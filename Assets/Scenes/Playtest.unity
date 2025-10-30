@@ -316,7 +316,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 2
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
@@ -345,15 +345,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   dashSpeed: 10
-  jumpForce: 12
+  jumpSpeed: 12
   groundCheck: {fileID: 0}
   groundCheckRadius: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 0
   playerStateController: {fileID: 1351650101}
-  isJumpPressed: 0
+  moveInputVector2: {x: 0, y: 0}
+  isJumping: 0
   isGrounded: 0
+  jumpCheckDelay: 0.1
 --- !u!95 &1351650099
 Animator:
   serializedVersion: 5
@@ -435,7 +437,7 @@ GameObject:
   - component: {fileID: 1603760817}
   m_Layer: 0
   m_Name: Square
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -516,7 +518,7 @@ BoxCollider2D:
   m_GameObject: {fileID: 1603760814}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: c8870a84883b69e4299560a3847eaeb4, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

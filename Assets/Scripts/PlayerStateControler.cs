@@ -49,12 +49,24 @@ public class PlayerStateController : MonoBehaviour
 
     private void PlayAnimationByState(State state)
     {
+        OnDisableAll();
         Debug.Log("Player State: " + state);
         animator.SetBool(state.ToString(),true);
+    }
+
+    private void OnDisableAll()
+    {
+        foreach (State state in Enum.GetValues(typeof(State)))
+        {
+            // Debug.Log("Disable State: " + state);
+            animator.SetBool(state.ToString(), false);
+        }
     }
 
     public State GetCurrentState()
     {
         return currentState;
     }
+
+    
 }
