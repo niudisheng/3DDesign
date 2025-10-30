@@ -8,7 +8,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")] public float moveSpeed = 5f;
     public float dashSpeed = 10f;
-    public float jumpForce = 12f;
+    public float jumpSpeed = 12f;
     public Transform groundCheck;
     public float groundCheckRadius = 0.2f;
     public LayerMask groundLayer;
@@ -17,9 +17,10 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private PlayerControls controls;
-    private Vector2 moveInputVector2;
-    public bool isJumpPressed;
+    public Vector2 moveInputVector2;
+    public bool isJumping;
     public bool isGrounded;
+    public float jumpCheckDelay = 0.1f;
 
     private bool isDashing = false;
     private int faceDir = 1; // 1 向右，-1 向左
@@ -33,7 +34,7 @@ public class PlayerController : MonoBehaviour
         // 监听输入
         controls.Player.Move.performed += ctx => moveInputVector2 = ctx.ReadValue<Vector2>();
         controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
-        controls.Player.Jump.performed += ctx => isJumpPressed = true;
+        controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
     }
 
@@ -43,13 +44,48 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         isGrounded = true; // 跳过检测，直接假设在地面上
-        // 跳跃输入检测
-        if (isJumpPressed && isGrounded)
+    }
+
+    private void TryJump()
+    {
+        if (isGrounded)
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            Jump();
+        }
+    }
+
+    private void Jump()
+    {
+        if (isJumping || !isGrounded) return; // 防止空中再次跳
+
+        rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
+        playerStateController.ChangeState(State.Jump);
+        StartCoroutine(JumpCoroutine());
+    }
+
+    private IEnumerator JumpCoroutine()
+    {
+        isJumping = true;
+        isGrounded = false;
+
+        // 持续检测竖直速度，直到开始下落
+        while (rb.velocity.y > 0f)
+        {
+            yield return new WaitForSeconds(jumpCheckDelay);
         }
 
-        isJumpPressed = false; // 重置跳跃输入
+        // 当上升到顶点速度变为0（或以下）时，切换到下落状态
+        playerStateController.ChangeState(State.Down);
+
+        // 等待落地
+        while (!isGrounded)
+        {
+            yield return null;
+        }
+
+        // 落地后回到Idle状态
+        playerStateController.ChangeState(State.Idle);
+        isJumping = false;
     }
 
 
@@ -64,19 +100,25 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (moveInputVector2.x == 0)
+        if (moveInputVector2.x == 0 && rb.velocity.y == 0)
         {
+            rb.velocity = new Vector2(0, rb.velocity.y);
             PlayerStateController.Instance.ChangeState(State.Idle);
         }
-
-        if (!isDashing)
+        else if (!isDashing)
+        {
             Move(); // 冲刺时禁止 Move()
+        }
     }
 
     private void Move()
-    {
-        playerStateController.ChangeState(State.Walk);
+    {   
         
+        if (Mathf.Abs(rb.velocity.y)<0.1f)
+        {
+            playerStateController.ChangeState(State.Walk);
+        }
+
         float moveX = moveInputVector2.x * moveSpeed;
         rb.velocity = new Vector2(moveX, rb.velocity.y);
 
