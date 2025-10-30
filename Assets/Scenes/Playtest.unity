@@ -345,7 +345,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 5
   dashSpeed: 10
-  jumpForce: 12
+  jumpSpeed: 12
   groundCheck: {fileID: 0}
   groundCheckRadius: 0.2
   groundLayer:
@@ -353,8 +353,9 @@ MonoBehaviour:
     m_Bits: 0
   playerStateController: {fileID: 1351650101}
   moveInputVector2: {x: 0, y: 0}
-  isJumpPressed: 0
+  isJumping: 0
   isGrounded: 0
+  jumpCheckDelay: 0.1
 --- !u!95 &1351650099
 Animator:
   serializedVersion: 5
@@ -436,7 +437,7 @@ GameObject:
   - component: {fileID: 1603760817}
   m_Layer: 0
   m_Name: Square
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

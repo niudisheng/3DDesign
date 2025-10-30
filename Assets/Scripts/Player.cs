@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -43,7 +44,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        isGrounded = true; // 跳过检测，直接假设在地面上
+        
+        
     }
 
     private void TryJump()
@@ -82,9 +84,7 @@ public class PlayerController : MonoBehaviour
         {
             yield return null;
         }
-
-        // 落地后回到Idle状态
-        playerStateController.ChangeState(State.Idle);
+        
         isJumping = false;
     }
 
@@ -100,7 +100,7 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (moveInputVector2.x == 0 && rb.velocity.y == 0)
+        if (moveInputVector2.x == 0 && isGrounded)
         {
             rb.velocity = new Vector2(0, rb.velocity.y);
             PlayerStateController.Instance.ChangeState(State.Idle);
@@ -114,7 +114,7 @@ public class PlayerController : MonoBehaviour
     private void Move()
     {   
         
-        if (Mathf.Abs(rb.velocity.y)<0.1f)
+        if (isGrounded)
         {
             playerStateController.ChangeState(State.Walk);
         }
@@ -149,5 +149,14 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(dashDuration);
 
         isDashing = false;
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+            Debug.Log("Grounded");
+        }
     }
 }

@@ -58,7 +58,7 @@ public class PlayerStateController : MonoBehaviour
     {
         foreach (State state in Enum.GetValues(typeof(State)))
         {
-            Debug.Log("Disable State: " + state);
+            // Debug.Log("Disable State: " + state);
             animator.SetBool(state.ToString(), false);
         }
     }
