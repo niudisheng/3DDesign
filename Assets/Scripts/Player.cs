@@ -10,22 +10,18 @@ public class PlayerController : MonoBehaviour
     [Header("Movement Settings")] public float moveSpeed = 5f;
     public float dashSpeed = 10f;
     public float jumpSpeed = 12f;
-    public Transform groundCheck;
-    public float groundCheckRadius = 0.2f;
-    public LayerMask groundLayer;
-
     public PlayerStateController playerStateController;
 
     private Rigidbody2D rb;
     private PlayerControls controls;
     public Vector2 moveInputVector2;
-    public bool isJumping;
+    public bool canJumping = true;
     public bool isGrounded;
-    public float jumpCheckDelay = 0.1f;
+    private float jumpCheckDelay = 0.1f;
 
-    private bool isDashing = false;
+    public bool isDashing = false;
     private int faceDir = 1; // 1 向右，-1 向左
-    private float dashDuration = 0.5f;
+    public float dashDuration = 0.3f;
 
     void Awake()
     {
@@ -44,13 +40,19 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        
-        
+        CheckGround();
+        // 混用跳跃过程，防止空中再次跳
+        if (rb.velocity.y < 0f && !isGrounded)
+        {
+            StartCoroutine(DownCoroutine());
+        }
     }
+
+    #region Jump
 
     private void TryJump()
     {
-        if (isGrounded)
+        if (canJumping)
         {
             Jump();
         }
@@ -58,21 +60,22 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
-        if (isJumping || !isGrounded) return; // 防止空中再次跳
-
+        isGrounded = false;
         rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
         playerStateController.ChangeState(State.Jump);
         StartCoroutine(JumpCoroutine());
     }
 
+    // 本质是一个判断空中的过程，速度快往上
     private IEnumerator JumpCoroutine()
     {
-        isJumping = true;
-        isGrounded = false;
+        canJumping = false;
+
 
         // 持续检测竖直速度，直到开始下落
-        while (rb.velocity.y > 0f)
+        while (rb.velocity.y >= 0f && !isGrounded)
         {
+            playerStateController.ChangeState(State.Jump);
             yield return new WaitForSeconds(jumpCheckDelay);
         }
 
@@ -84,23 +87,30 @@ public class PlayerController : MonoBehaviour
         {
             yield return null;
         }
-        
-        isJumping = false;
+
+        canJumping = true;
     }
 
-
-    void OnDrawGizmosSelected()
+    private IEnumerator DownCoroutine()
     {
-        if (groundCheck)
+        // 当上升到顶点速度变为0（或以下）时，切换到下落状态
+        playerStateController.ChangeState(State.Down);
+
+        // 等待落地
+        while (!isGrounded)
         {
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+            yield return null;
         }
+
+        // isJumping = false;
     }
+
+    #endregion
+
 
     void FixedUpdate()
     {
-        if (moveInputVector2.x == 0 && isGrounded)
+        if (moveInputVector2.x == 0 && isGrounded&&!isDashing)
         {
             rb.velocity = new Vector2(0, rb.velocity.y);
             PlayerStateController.Instance.ChangeState(State.Idle);
@@ -112,8 +122,7 @@ public class PlayerController : MonoBehaviour
     }
 
     private void Move()
-    {   
-        
+    {
         if (isGrounded)
         {
             playerStateController.ChangeState(State.Walk);
@@ -126,14 +135,16 @@ public class PlayerController : MonoBehaviour
         if (moveX > 0.1f)
         {
             faceDir = 1;
-            transform.localScale = new Vector3(1, 1, 1);
+            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
         }
         else if (moveX < -0.1f)
         {
             faceDir = -1;
-            transform.localScale = new Vector3(-1, 1, 1);
+            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
         }
     }
+
+    #region Dash
 
     private void TryDash()
     {
@@ -145,18 +156,37 @@ public class PlayerController : MonoBehaviour
     {
         isDashing = true;
         rb.velocity = new Vector2(faceDir * dashSpeed, 0f); // 冲刺锁定方向，并锁 y
-
+        playerStateController.ChangeState(State.Dash);
         yield return new WaitForSeconds(dashDuration);
-
+        playerStateController.DisableState(State.Dash);
         isDashing = false;
     }
 
-    private void OnCollisionEnter2D(Collision2D other)
+    #endregion
+
+
+    #region Ground Check
+
+    [Header("Ground Settings")] public float groundCheckDistance = 0.1f;
+    public Transform groundCheckPoint; // 脚底检测点
+    public LayerMask groundLayer;
+
+    // public bool IsGrounded { get; private set; }
+
+
+    private void CheckGround()
     {
-        if (other.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-            Debug.Log("Grounded");
-        }
+        // 射线向下检测
+        RaycastHit2D hit = Physics2D.Raycast(groundCheckPoint.position, Vector2.down, groundCheckDistance, groundLayer);
+        // Debug.Log(hit.collider);
+
+        isGrounded = hit.collider != null;
+
+
+        // 可视化射线
+        Color color = isGrounded ? Color.green : Color.red;
+        Debug.DrawRay(groundCheckPoint.position, Vector2.down * groundCheckDistance, color);
     }
+
+    #endregion
 }
