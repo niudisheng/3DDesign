@@ -76,6 +76,14 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_14db6b5e176f4c909548dd275520c9ce_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: d214cdbf95fa4e34f934d05ca2bf105a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SampleTexture2D_9c0ec7532a5340d58fb7ffe73e1467ec_Texture_1_Texture2D:
+        m_Texture: {fileID: 2800000, guid: 457a87a30b6f0c7429019c3277b52398, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SampleTexture2D_a06f3f0e950042ab936fa015d304b987_Texture_1_Texture2D:
         m_Texture: {fileID: 8400000, guid: bdf8169467ba5604699eef8b2c122011, type: 2}
         m_Scale: {x: 1, y: 1}
@@ -116,9 +124,20 @@ Material:
     - _SrcBlend: 1
     - _UVSec: 0
     - _ZWrite: 1
+    - _noiseScale: 0.6
+    - _pianli: 1
+    - _speed: 2
+    - _strenth: 0.002
+    - _waterColorStrenth: 2
+    - _waveSpeed: 0.08
+    - _waveStrenth: 3.38
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
+    - _noiseScale_1: {r: 0.5, g: 3, b: 0, a: 0}
+    - _waterColor: {r: 0.41424885, g: 0.63105196, b: 0.8207547, a: 0}
+    - _waveColor: {r: 0.3490566, g: 0.3490566, b: 0.3490566, a: 0}
+    - _waveTiling: {r: -3.28, g: 4.55, b: 0, a: 0}
   m_BuildTextureStacks: []
