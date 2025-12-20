@@ -225,6 +225,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Video
       objectReference: {fileID: 0}
+    - target: {fileID: 3940849936580681278, guid: 9e67d08326fd3294a91ae4f7e7393e3a, type: 3}
+      propertyPath: m_Looping
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5277134035463170357, guid: 9e67d08326fd3294a91ae4f7e7393e3a, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -244,6 +248,10 @@ PrefabInstance:
     - target: {fileID: 7591466632039849813, guid: 9e67d08326fd3294a91ae4f7e7393e3a, type: 3}
       propertyPath: m_LocalPosition.y
       value: -0.1927
+      objectReference: {fileID: 0}
+    - target: {fileID: 9179390920425532014, guid: 9e67d08326fd3294a91ae4f7e7393e3a, type: 3}
+      propertyPath: m_Name
+      value: Background
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
