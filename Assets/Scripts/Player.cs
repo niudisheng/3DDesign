@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 using State = PlayerStateController.State;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+public class Player : MonoBehaviour
 {
     [Header("Movement Settings")] public float moveSpeed = 5f;
     public float dashSpeed = 10f;
@@ -189,4 +189,6 @@ public class PlayerController : MonoBehaviour
     }
 
     #endregion
+
+    
 }
