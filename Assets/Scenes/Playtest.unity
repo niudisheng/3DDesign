@@ -184,7 +184,7 @@ CapsuleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 1.7089243, y: 0}
@@ -334,6 +334,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 10
+  maxHealth: 50
   hitCooldown: 1
   damageTrigger: {fileID: 404275212}
   autoHurtOnEnter: 1
@@ -501,6 +502,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 10
+  maxHealth: 50
   hitCooldown: 1
   damageTrigger: {fileID: 481416838}
   autoHurtOnEnter: 0
@@ -661,6 +663,7 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 100
   invincibleDuration: 1
+  attackDamage: 10
 --- !u!1 &1603760814
 GameObject:
   m_ObjectHideFlags: 0
@@ -878,6 +881,10 @@ PrefabInstance:
       propertyPath: isGrounded
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2086892303125422354, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
+      propertyPath: playerInteract
+      value: 
+      objectReference: {fileID: 1385918258}
     - target: {fileID: 8428103945731767550, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.33

@@ -11,6 +11,7 @@ public class Player : MonoBehaviour
     public float dashSpeed = 10f;
     public float jumpSpeed = 12f;
     public PlayerStateController playerStateController;
+    public PlayerInteract playerInteract;
 
     private Rigidbody2D rb;
     private PlayerControls controls;
@@ -20,6 +21,7 @@ public class Player : MonoBehaviour
     private float jumpCheckDelay = 0.1f;
 
     public bool isDashing = false;
+    public bool isAttacking = false;
     private int faceDir = 1; // 1 向右，-1 向左
     public float dashDuration = 0.3f;
 
@@ -33,6 +35,7 @@ public class Player : MonoBehaviour
         controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
         controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
+        controls.Player.Attack.performed += ctx => TryAttack();
     }
 
     void OnEnable() => controls.Player.Enable();
@@ -110,15 +113,20 @@ public class Player : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (moveInputVector2.x == 0 && isGrounded&&!isDashing)
+        if (moveInputVector2.x == 0 && isGrounded && CanMove())
         {
             rb.velocity = new Vector2(0, rb.velocity.y);
             PlayerStateController.Instance.ChangeState(State.Idle);
         }
-        else if (!isDashing)
+        else if (CanMove())
         {
             Move(); // 冲刺时禁止 Move()
         }
+    }
+
+    private bool CanMove()
+    {
+        return !isDashing && !isAttacking;
     }
 
     private void Move()
@@ -148,7 +156,7 @@ public class Player : MonoBehaviour
 
     private void TryDash()
     {
-        if (!isDashing)
+        if (CanMove())
             StartCoroutine(DashCoroutine());
     }
 
@@ -190,5 +198,16 @@ public class Player : MonoBehaviour
 
     #endregion
 
-    
+    #region Attack
+
+    public void TryAttack()
+    {
+        if (CanMove())
+        {
+            isAttacking = true;
+            playerInteract.Attack(true);
+        }
+    }
+
+    #endregion
 }
