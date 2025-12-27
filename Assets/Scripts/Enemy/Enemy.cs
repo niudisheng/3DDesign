@@ -1,12 +1,11 @@
 // Enemy.cs
 // 说明：本文件实现了敌人的伤害判定逻辑，使用可配置的触发器（Trigger hitbox）来判断玩家进入/停留/离开
 // 主要功能：
-// - 可在 Inspector 中配置伤害值 (damage)、对同一玩家的（可选）短内置冷却 (perActorCooldown)
+// - 可在 Inspector 中配置伤害值 (damage)、对同一玩家的伤害冷却时间 (hitCooldown)
 // - 使用子对象的 Collider2D（isTrigger = true）作为敌人的伤害区域（damageTrigger）
-// - 支持进入时立即伤害（autoHurtOnEnter）和停留时按配置持续伤害（stayingDamage）
-// - 对每个被伤害的 actor 使用字典记录上一次受击时间（仅在 perActorCooldown>0 时启用），防止短时间内重复受伤
+// - 支持进入时立即伤害（autoHurtOnEnter）和停留时按冷却持续伤害（damageWhileInside）
+// - 对每个被伤害的 actor 使用字典记录上一次受击时间，防止短时间内重复受伤
 // - 当玩家离开触发区或敌人销毁时会清理记录，避免内存泄漏
-// - 玩家真正的无敌处理（防止被多个敌人同时伤害造成多次扣血）应由 Player 端实现（PlayerInteract.invincibleDuration）
 
 using System;
 using System.Collections.Generic;
@@ -26,10 +25,9 @@ public class Enemy : SceneItem, IInteractable, IHurtPlayer
     private int currentHealth;
 
     [Header("Damage Settings")]
-    // perActorCooldown：两个连续对同一 actor 造成伤害的最小间隔（秒）——这是敌人侧的可选短 CD，用来避免同一敌人在一帧或连续触发中反复调用玩家受伤
-    // 注：为了实现“玩家被多个敌人同时攻击时只受一次伤害”的需求，核心的无敌判定应在 PlayerInteract.Hurt 中处理（invincibleDuration）。
-    [SerializeField, Tooltip("Optional: seconds between consecutive damage from this enemy to the same actor. Set to 0 to disable.")]
-    private float perActorCooldown = 0f;
+    // hitCooldown：两个连续对同一 actor 造成伤害的最小间隔（秒）
+    [SerializeField, Tooltip("Seconds between consecutive damage to the same interactor")]
+    private float hitCooldown = 1.0f;
 
     [Header("Physics (Trigger Hitbox)")]
     [SerializeField, Tooltip("A Collider2D configured as a trigger that represents the enemy's damaging area. Assign a child collider set to 'isTrigger' = true.")]
@@ -40,10 +38,10 @@ public class Enemy : SceneItem, IInteractable, IHurtPlayer
 
     [FormerlySerializedAs("StayingDamage")]
     [FormerlySerializedAs("damageWhileInside")]
-    [SerializeField, Tooltip("If true, the enemy will keep attempting to damage the player while they remain inside the trigger (subject to perActorCooldown if set).")]
+    [SerializeField, Tooltip("If true, the enemy will keep attempting to damage the player while they remain inside the trigger (subject to hitCooldown).")]
     private bool stayingDamage = true;
 
-    // 用于记录每个 actor（如玩家）上次被本敌人伤害的时间（Time.time），以实现 per-actor 冷却（仅在 perActorCooldown>0 时启用）
+    // 用于记录每个 actor（如玩家）上次被本敌人伤害的时间（Time.time），以实现 per-actor 冷却
     // key: 被伤害的 GameObject（使用 PlayerInteract.gameObject 作为 key），value: 上次受击时刻
     private Dictionary<GameObject, float> lastHitTime = new Dictionary<GameObject, float>();
 
@@ -63,10 +61,8 @@ public class Enemy : SceneItem, IInteractable, IHurtPlayer
         currentHealth = maxHealth;
     }
 
-    // 确保调用基类 Awake（SceneItem 会缓存 Rigidbody2D 到 Rb）
-    protected override void Awake()
+    private void Awake()
     {
-        base.Awake();
         // 初始化血量
         currentHealth = maxHealth;
     }
@@ -133,7 +129,7 @@ public class Enemy : SceneItem, IInteractable, IHurtPlayer
 
     public void OnPlayerExit(GameObject interactor)
     {
-        // Debug.Log($"Enemy: Player exited interaction range. player={interactor?.name}");
+        Debug.Log($"Enemy: Player exited interaction range. player={interactor?.name}");
         if (interactor != null && lastHitTime.ContainsKey(interactor))
         {
             lastHitTime.Remove(interactor);
@@ -145,40 +141,37 @@ public class Enemy : SceneItem, IInteractable, IHurtPlayer
         Debug.Log($"Enemy: Interact called by {interactor?.name}");
     }
 
-    // IHurtPlayer 接口实现：对指定 actor 造成伤害
-    // 重要说明（设计决策）：
-    // - 玩家是否真正受到伤害（避免同时被多个敌人重复扣血）应由玩家端的无敌机制来处理（PlayerInteract.Hurt 中的 invincibleDuration）。
-    // - 本方法仅提供一个可选的每敌人内置短 CD（perActorCooldown），用于避免同一敌人在一帧内重复调用造成多次扣血或性能浪费。
+    // IHurtPlayer 接口实现：对指定 actor 造成伤害（遵循 per-actor 冷却）
+    // 这用于敌人的环境伤害（如持续区域/接触伤害），仍然按 hitCooldown 生效
     public void Hurt(GameObject actor)
     {
         if (actor == null) return;
 
-        // 优先判断是否为玩家
+        // 统一使用 PlayerInteract 所在的根物体作为 key
         var player = actor.GetComponentInParent<PlayerInteract>();
-        if (player != null)
+        GameObject key = player != null ? player.gameObject : actor;
+
+        float now = Time.time;
+        if (lastHitTime.TryGetValue(key, out float last))
         {
-            // 如果设置了 per-actor 冷却，则按该冷却进行去重；否则直接调用玩家的 Hurt，由玩家自己处理无敌/扣血逻辑
-            if (perActorCooldown > 0f)
+            if (now - last < hitCooldown)
             {
-                GameObject key = player.gameObject;
-                float now = Time.time;
-                if (lastHitTime.TryGetValue(key, out float last))
-                {
-                    if (now - last < perActorCooldown)
-                    {
-                        return; // 敌人侧短 CD 生效，忽略本次调用
-                    }
-                }
-                lastHitTime[key] = now;
+                return; // 冷却中
             }
-            
-            // 直接调用玩家受伤，玩家会根据 invincibleDuration 决定是否真正扣血，从而实现“多个敌人同时打只扣一次血”的需求
-            player.Hurt(damage);
-            return;
         }
 
-        // 如果不是玩家，也可以根据需要处理其他交互对象
-        Debug.LogWarning($"Enemy: Actor {actor.name} has no PlayerInteract component to receive damage.");
+        lastHitTime[key] = now;
+
+        Debug.Log($"Enemy: Hurt called on actor {key.name}. Damage={damage}");
+
+        if (player != null)
+        {
+            player.Hurt(damage);
+        }
+        else
+        {
+            Debug.LogWarning($"Enemy: Actor {actor.name} has no PlayerInteract component to receive damage.");
+        }
     }
 
     // 新增：当受到玩家攻击（外部 hitbox）时调用。采用 attackId 去重，保证同一次攻击对本敌人只造成一次伤害。

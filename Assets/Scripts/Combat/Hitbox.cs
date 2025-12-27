@@ -42,7 +42,6 @@ public class Hitbox : MonoBehaviour
 
         // 调用敌人的 ReceiveHit，敌人会根据 attackId 去重
         enemy.ReceiveHit(attackId, attacker, damage);
-        Debug.Log("对敌人造成伤害: " + enemyGo.name + " AttackId=" + attackId + " Damage=" + damage);
     }
 
     // 若 hitbox 也在停留期间造成多次触发，OnTriggerStay2D 可能也触发，我们通常只处理 Enter 即可
