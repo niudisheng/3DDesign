@@ -206,7 +206,15 @@ public class Player : MonoBehaviour
         {
             isAttacking = true;
             playerInteract.Attack(true);
+            playerStateController.ChangeState(State.Attack);
+            
         }
+    }
+    public void EndAttack()
+    {
+        isAttacking = false;
+        playerInteract.Attack(false);
+        playerStateController.DisableState(State.Attack);
     }
 
     #endregion
