@@ -20,14 +20,14 @@ public class Player : MonoBehaviour
     public bool isGrounded;
     private float jumpCheckDelay = 0.1f;
 
-
-   
+<<<<<<< Updated upstream
+    private bool isDashing = false;
     private bool isAttacking = false;
-
-
+    private int faceDir = 1; // 1 向右，-1 向左
+=======
     public bool isDashing = false;
     public int faceDir = 1; // 1 向右，-1 向左
-
+>>>>>>> Stashed changes
     public float dashDuration = 0.3f;
     
     
@@ -48,16 +48,16 @@ public class Player : MonoBehaviour
         controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
         controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
-
+<<<<<<< Updated upstream
         if (haveSword)
         {
             controls.Player.Attack.performed += ctx => TryAttack();
         }
-
+=======
         
         _cameraFollowObject= _cameraFollowGo.GetComponent<CameraFollowObject>();
         
-
+>>>>>>> Stashed changes
     }
 
     void OnEnable() => controls.Player.Enable();
