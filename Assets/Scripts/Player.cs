@@ -15,15 +15,17 @@ public class Player : MonoBehaviour
 
     private Rigidbody2D rb;
     private PlayerControls controls;
-    public Vector2 moveInputVector2;
-    public bool canJumping = true;
+    private Vector2 moveInputVector2;
+    private bool canJumping = true;
     public bool isGrounded;
     private float jumpCheckDelay = 0.1f;
 
-    public bool isDashing = false;
-    public bool isAttacking = false;
+    private bool isDashing = false;
+    private bool isAttacking = false;
     private int faceDir = 1; // 1 向右，-1 向左
     public float dashDuration = 0.3f;
+
+    [Header("Have sword")] public bool haveSword = true;
 
     void Awake()
     {
@@ -35,7 +37,10 @@ public class Player : MonoBehaviour
         controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
         controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
-        controls.Player.Attack.performed += ctx => TryAttack();
+        if (haveSword)
+        {
+            controls.Player.Attack.performed += ctx => TryAttack();
+        }
     }
 
     void OnEnable() => controls.Player.Enable();
@@ -105,7 +110,7 @@ public class Player : MonoBehaviour
             yield return null;
         }
 
-        // isJumping = false;
+        playerStateController.DisableState(State.Down);
     }
 
     #endregion
@@ -207,9 +212,9 @@ public class Player : MonoBehaviour
             isAttacking = true;
             playerInteract.Attack(true);
             playerStateController.ChangeState(State.Attack);
-            
         }
     }
+
     public void EndAttack()
     {
         isAttacking = false;
