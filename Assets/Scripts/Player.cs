@@ -33,6 +33,7 @@ public class Player : MonoBehaviour
     [SerializeField] private GameObject _cameraFollowGo;
 
     private CameraFollowObject _cameraFollowObject;
+    private float _fallSpeedYDampingChangeThreshold;
 
     void Awake()
     {
@@ -50,6 +51,8 @@ public class Player : MonoBehaviour
         
         _cameraFollowObject= _cameraFollowGo.GetComponent<CameraFollowObject>();
         
+        _fallSpeedYDampingChangeThreshold=CameraManager.instance._fallSpeedYDampingChangeThreshold;
+        
 
     }
 
@@ -64,6 +67,25 @@ public class Player : MonoBehaviour
         {
             StartCoroutine(DownCoroutine());
         }
+        
+        
+        if (rb.velocity.y < _fallSpeedYDampingChangeThreshold && !CameraManager.instance.IsLerpingYDamping && !CameraManager.instance.LerpedFromPlayerFalling)
+        {
+            CameraManager.instance.LerpYDamping(true);
+        }
+
+
+        if (rb.velocity.y >= 0f && !CameraManager.instance.IsLerpingYDamping && CameraManager.instance.LerpedFromPlayerFalling)
+        {
+            //reset so it can be called again
+            CameraManager.instance.LerpedFromPlayerFalling = false;
+            CameraManager.instance.LerpYDamping(false);
+        }
+        
+        Debug.Log($"Velocity: {rb.velocity.y}, Threshold: {_fallSpeedYDampingChangeThreshold}");
+        Debug.Log($"IsLerping: {CameraManager.instance.IsLerpingYDamping}");
+        Debug.Log($"LerpedFromFalling: {CameraManager.instance.LerpedFromPlayerFalling}");
+        
     }
 
     #region Jump
