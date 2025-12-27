@@ -13,21 +13,21 @@ public class CameraFollowObject : MonoBehaviour
     
     private Coroutine _turnCoroutine;
     
-<<<<<<< Updated upstream
+
     private Player _player;
-=======
-    private PlayerController _player;
->>>>>>> Stashed changes
+
+    
+
     
     private int faceDir;
 
     private void Awake()
     {
-<<<<<<< Updated upstream
+
         _player = _playerTransform.gameObject.GetComponent<Player>();
-=======
-        _player = _playerTransform.gameObject.GetComponent<PlayerController>();
->>>>>>> Stashed changes
+        
+        _player = _playerTransform.gameObject.GetComponent<Player>();
+
             
         faceDir =_player.faceDir;
     }
@@ -78,9 +78,9 @@ public class CameraFollowObject : MonoBehaviour
         if (currentFaceDir == 1)
         {
             return 0f;
-        }
+        } 
         else
-        {
+        {  
             return 180f;
         }
     }
