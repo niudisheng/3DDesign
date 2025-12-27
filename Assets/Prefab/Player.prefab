@@ -105,12 +105,16 @@ MonoBehaviour:
   moveSpeed: 8
   dashSpeed: 20
   jumpSpeed: 12
+  jumpSpeed: 16
   playerStateController: {fileID: 6220438208831254281}
   moveInputVector2: {x: 0, y: 0}
   canJumping: 1
   isGrounded: 0
   isDashing: 0
+  isAttacking: 0
+  faceDir: 1
   dashDuration: 0.25
+  _cameraFollowGo: {fileID: 0}
   groundCheckDistance: 0.1
   groundCheckPoint: {fileID: 1022165662729131045}
   groundLayer:

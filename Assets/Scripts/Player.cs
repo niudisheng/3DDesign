@@ -21,9 +21,18 @@ public class Player : MonoBehaviour
     private float jumpCheckDelay = 0.1f;
 
     public bool isDashing = false;
+
     public bool isAttacking = false;
-    private int faceDir = 1; // 1 向右，-1 向左
+
+    public int faceDir = 1; // 1 向右，-1 向左
+
     public float dashDuration = 0.3f;
+    
+    
+    [Header("摄像机跟随目标")]
+    [SerializeField] private GameObject _cameraFollowGo;
+
+    private CameraFollowObject _cameraFollowObject;
 
     void Awake()
     {
@@ -35,7 +44,13 @@ public class Player : MonoBehaviour
         controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
         controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
+
         controls.Player.Attack.performed += ctx => TryAttack();
+
+        
+        _cameraFollowObject= _cameraFollowGo.GetComponent<CameraFollowObject>();
+        
+
     }
 
     void OnEnable() => controls.Player.Enable();
@@ -144,11 +159,17 @@ public class Player : MonoBehaviour
         {
             faceDir = 1;
             transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            
+            _cameraFollowObject.CallTurn();
+            
         }
         else if (moveX < -0.1f)
         {
             faceDir = -1;
             transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            
+            _cameraFollowObject.CallTurn();
+            
         }
     }
 
