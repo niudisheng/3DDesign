@@ -76,6 +76,11 @@ public class CameraFollowObject : MonoBehaviour
             return 180f;
         }
     }
-    
+
+    public void SetPlayer(Transform playerTransform)
+    {
+        _playerTransform = playerTransform;
+    }
+
 
 }

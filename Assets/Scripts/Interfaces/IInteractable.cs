@@ -10,6 +10,7 @@ namespace Game
     {
         void OnPlayerEnter(GameObject Player);
         void OnPlayerExit(GameObject interactor);
+        void Interact();
         void Interact(GameObject interactor);
     }
 }

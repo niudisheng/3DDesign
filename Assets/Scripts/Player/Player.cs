@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Game;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using State = PlayerStateController.State;
@@ -43,6 +44,7 @@ public class Player : MonoBehaviour
         controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
         controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
+        controls.Player.Interact.performed += ctx => playerInteract.TryInteract();
         if (haveSword)
         {
             controls.Player.Attack.performed += ctx => TryAttack();
@@ -53,7 +55,12 @@ public class Player : MonoBehaviour
         _fallSpeedYDampingChangeThreshold=CameraManager.instance._fallSpeedYDampingChangeThreshold;
     }
 
-    void OnEnable() => controls.Player.Enable();
+    void OnEnable()
+    {
+        controls.Player.Enable();
+        _cameraFollowObject.SetPlayer(this.transform);
+    }
+
     void OnDisable() => controls.Player.Disable();
 
     void Update()
@@ -252,4 +259,14 @@ public class Player : MonoBehaviour
     }
 
     #endregion
+    
+    /// <summary>
+    /// 玩家获得剑
+    /// </summary>
+    /// <param name="hasSword"></param>
+    public void SetSword(bool hasSword)
+    {
+        hasSword = hasSword;
+    }
+
 }

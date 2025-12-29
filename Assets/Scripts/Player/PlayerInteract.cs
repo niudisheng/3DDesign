@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Game;
 using UnityEngine;
 
 public class PlayerInteract : MonoBehaviour
@@ -26,8 +27,8 @@ public class PlayerInteract : MonoBehaviour
 
     
 
-    #region HurtPlayer Player
-
+    #region 受伤代码
+    
     public void Hurt(int damage)
     {
         float now = Time.time;
@@ -87,5 +88,26 @@ public class PlayerInteract : MonoBehaviour
     // Provide accessors for hitbox/attack info if other systems need them
     public int GetCurrentAttackId() => currentAttackId;
 
+    #endregion
+
+    #region Interact
+    private  IInteractable currentItem;
+    
+    public void TryInteract()
+    {
+        if (currentItem != null)
+        {
+            currentItem.Interact(this.gameObject);
+        }
+    }
+    
+    private void OnCollisionStay2D(Collision2D other)
+    {
+        if (other.gameObject.GetComponent<IInteractable>()!=null)
+        {
+            currentItem = other.gameObject.GetComponent<IInteractable>();
+        }
+        
+    }
     #endregion
 }
