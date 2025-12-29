@@ -15,7 +15,7 @@ public class CameraFollowObject : MonoBehaviour
     
     private Player _player;
     
-    private int faceDir;
+    public int faceDir;
 
     private void Awake()
     {
