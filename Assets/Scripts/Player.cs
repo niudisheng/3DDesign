@@ -82,9 +82,9 @@ public class Player : MonoBehaviour
             CameraManager.instance.LerpYDamping(false);
         }
         
-        Debug.Log($"Velocity: {rb.velocity.y}, Threshold: {_fallSpeedYDampingChangeThreshold}");
-        Debug.Log($"IsLerping: {CameraManager.instance.IsLerpingYDamping}");
-        Debug.Log($"LerpedFromFalling: {CameraManager.instance.LerpedFromPlayerFalling}");
+        // Debug.Log($"Velocity: {rb.velocity.y}, Threshold: {_fallSpeedYDampingChangeThreshold}");
+        // Debug.Log($"IsLerping: {CameraManager.instance.IsLerpingYDamping}");
+        // Debug.Log($"LerpedFromFalling: {CameraManager.instance.LerpedFromPlayerFalling}");
         
     }
 
