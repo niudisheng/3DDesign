@@ -26,6 +26,12 @@ public class Player : MonoBehaviour
     public float dashDuration = 0.3f;
 
     [Header("Have sword")] public bool haveSword = true;
+    
+    [Header("摄像机跟随目标")]
+    [SerializeField] private GameObject _cameraFollowGo;
+
+    private CameraFollowObject _cameraFollowObject;
+    private float _fallSpeedYDampingChangeThreshold;
 
     void Awake()
     {
@@ -41,6 +47,10 @@ public class Player : MonoBehaviour
         {
             controls.Player.Attack.performed += ctx => TryAttack();
         }
+        
+        _cameraFollowObject= _cameraFollowGo.GetComponent<CameraFollowObject>();
+        
+        _fallSpeedYDampingChangeThreshold=CameraManager.instance._fallSpeedYDampingChangeThreshold;
     }
 
     void OnEnable() => controls.Player.Enable();
@@ -54,6 +64,23 @@ public class Player : MonoBehaviour
         {
             StartCoroutine(DownCoroutine());
         }
+        
+        if (rb.velocity.y < _fallSpeedYDampingChangeThreshold && !CameraManager.instance.IsLerpingYDamping && !CameraManager.instance.LerpedFromPlayerFalling)
+        {
+            CameraManager.instance.LerpYDamping(true);
+        }
+
+
+        if (rb.velocity.y >= 0f && !CameraManager.instance.IsLerpingYDamping && CameraManager.instance.LerpedFromPlayerFalling)
+        {
+            //reset so it can be called again
+            CameraManager.instance.LerpedFromPlayerFalling = false;
+            CameraManager.instance.LerpYDamping(false);
+        }
+        
+        // Debug.Log($"Velocity: {rb.velocity.y}, Threshold: {_fallSpeedYDampingChangeThreshold}");
+        // Debug.Log($"IsLerping: {CameraManager.instance.IsLerpingYDamping}");
+        // Debug.Log($"LerpedFromFalling: {CameraManager.instance.LerpedFromPlayerFalling}");
     }
 
     #region Jump
@@ -149,11 +176,13 @@ public class Player : MonoBehaviour
         {
             faceDir = 1;
             transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            _cameraFollowObject.CallTurn();
         }
         else if (moveX < -0.1f)
         {
             faceDir = -1;
             transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            _cameraFollowObject.CallTurn();
         }
     }
 

@@ -140,12 +140,10 @@ MonoBehaviour:
   jumpSpeed: 12
   playerStateController: {fileID: 5305801365030441793}
   playerInteract: {fileID: 2231528848729376401}
-  moveInputVector2: {x: 0, y: 0}
-  canJumping: 1
   isGrounded: 1
-  isDashing: 0
-  isAttacking: 0
+  faceDir: 1
   dashDuration: 0.25
+  haveSword: 1
   groundCheckDistance: 0.1
   groundCheckPoint: {fileID: 7839034783477436302}
   groundLayer:
@@ -217,7 +215,7 @@ Animator:
   m_GameObject: {fileID: 6691205192061893909}
   m_Enabled: 1
   m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: f97ecd638bbd811489e1a15dc0102e9f, type: 2}
+  m_Controller: {fileID: 9100000, guid: 60978196c32ee414e8e3039c0080692e, type: 2}
   m_CullingMode: 0
   m_UpdateMode: 0
   m_ApplyRootMotion: 0

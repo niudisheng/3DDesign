@@ -268,7 +268,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   maxHealth: 50
-  perActorCooldown: 0
+  hitCooldown: 1
   damageTrigger: {fileID: 404275212}
   autoHurtOnEnter: 1
   stayingDamage: 1
@@ -438,22 +438,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   maxHealth: 50
-  perActorCooldown: 0
-  damageTrigger: {fileID: 2092858653}
+  hitCooldown: 1
+  damageTrigger: {fileID: 0}
   autoHurtOnEnter: 0
   stayingDamage: 1
   moveSpeed: 1.5
   groundCheckDistance: 0.6
   wallCheckDistance: 0.4
   pauseOnTurn: 0.4
-  groundCheckPoint: {fileID: 1691020159}
-  wallCheckPoint: {fileID: 982622709}
+  groundCheckPoint: {fileID: 0}
+  wallCheckPoint: {fileID: 0}
   groundLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 0
   moveDir: 1
 --- !u!1 &982622708
 GameObject:
@@ -654,7 +654,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   maxHealth: 50
-  perActorCooldown: 0
+  hitCooldown: 1
   damageTrigger: {fileID: 1451441262}
   autoHurtOnEnter: 1
   stayingDamage: 1
@@ -1010,10 +1010,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 51999761202820545, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8428103945731767550, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.33
@@ -1067,10 +1063,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4822511190516313890, guid: a6257ee89c07cf24cbaf4539c88b1ef9, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 60978196c32ee414e8e3039c0080692e, type: 2}
     - target: {fileID: 6691205192061893909, guid: a6257ee89c07cf24cbaf4539c88b1ef9, type: 3}
       propertyPath: m_Name
       value: N-Player

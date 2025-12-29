@@ -22,7 +22,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8428103945731767550
 Transform:
   m_ObjectHideFlags: 0
@@ -109,12 +109,10 @@ MonoBehaviour:
   jumpSpeed: 12
   playerStateController: {fileID: 6220438208831254281}
   playerInteract: {fileID: 628749057615753688}
-  moveInputVector2: {x: 0, y: 0}
-  canJumping: 1
   isGrounded: 1
-  isDashing: 0
-  isAttacking: 0
+  faceDir: 1
   dashDuration: 0.25
+  haveSword: 1
   groundCheckDistance: 0.1
   groundCheckPoint: {fileID: 1022165662729131045}
   groundLayer:
