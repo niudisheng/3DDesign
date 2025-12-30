@@ -48,10 +48,7 @@ public class Player : MonoBehaviour
         controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
         controls.Player.Interact.performed += ctx => playerInteract.TryInteract();
-        if (haveSword)
-        {
-            controls.Player.Attack.performed += ctx => TryAttack();
-        }
+        controls.Player.Attack.performed += ctx => TryAttack();
         
         _cameraFollowObject= _cameraFollowGo.GetComponent<CameraFollowObject>();
         
@@ -252,7 +249,7 @@ public class Player : MonoBehaviour
 
     public void TryAttack()
     {
-        if (CanMove())
+        if (CanMove()&&haveSword)
         {
             isAttacking = true;
             playerInteract.Attack(true);
