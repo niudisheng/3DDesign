@@ -26,7 +26,10 @@ public class Player : MonoBehaviour
     public int faceDir = 1; // 1 向右，-1 向左
     public float dashDuration = 0.3f;
 
-    [Header("Have sword")] public bool haveSword = true;
+    [Header("Have sword")] 
+    public bool haveSword = true;
+
+    
     
     [Header("摄像机跟随目标")]
     [SerializeField] private GameObject _cameraFollowGo;
@@ -55,10 +58,16 @@ public class Player : MonoBehaviour
         _fallSpeedYDampingChangeThreshold=CameraManager.instance._fallSpeedYDampingChangeThreshold;
     }
 
+    private void Start()
+    {
+        playerStateController.ChangeAnimator(haveSword);
+    }
+
     void OnEnable()
     {
         controls.Player.Enable();
         _cameraFollowObject.SetPlayer(this.transform);
+        
     }
 
     void OnDisable() => controls.Player.Disable();
@@ -155,7 +164,7 @@ public class Player : MonoBehaviour
         if (moveInputVector2.x == 0 && isGrounded && CanMove())
         {
             rb.velocity = new Vector2(0, rb.velocity.y);
-            PlayerStateController.Instance.ChangeState(State.Idle);
+            playerStateController.ChangeState(State.Idle);
         }
         else if (CanMove())
         {
@@ -251,6 +260,9 @@ public class Player : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 动画事件调用，结束攻击
+    /// </summary>
     public void EndAttack()
     {
         isAttacking = false;
@@ -266,7 +278,14 @@ public class Player : MonoBehaviour
     /// <param name="hasSword"></param>
     public void SetSword(bool hasSword)
     {
-        hasSword = hasSword;
+        haveSword = hasSword;
+        playerStateController.ChangeAnimator(hasSword);
+        
+    }
+    
+    public void GetSword() {
+        
+        SetSword(true);
     }
 
 }

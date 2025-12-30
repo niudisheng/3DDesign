@@ -17,13 +17,12 @@ public class Sword : SceneItem,IInteractable
 
     public void Interact()
     {
-        
+        GameManager.Instance.ChangePlayer();
     }
 
     public void Interact(GameObject interactor)
     {
-        Player player =  interactor.GetComponent<Player>();
-        player.SetSword(true);
+        
 
     }
 }

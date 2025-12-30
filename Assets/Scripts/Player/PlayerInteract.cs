@@ -18,7 +18,7 @@ public class PlayerInteract : MonoBehaviour
 
     // attack damage
     [SerializeField, Tooltip("Damage dealt by player's basic attack")] private int attackDamage = 10;
-
+    
     // track invincibility end time
     private float invincibleUntil = 0f;
 
@@ -92,22 +92,52 @@ public class PlayerInteract : MonoBehaviour
 
     #region Interact
     private  IInteractable currentItem;
-    
+    [SerializeField, Tooltip("可交互标识")] private GameObject InteractableIcon;
+
+    private void Start()
+    {
+        InteractableIcon.SetActive(false);
+    }
+
     public void TryInteract()
     {
         if (currentItem != null)
         {
-            currentItem.Interact(this.gameObject);
+            currentItem.Interact();
         }
     }
     
-    private void OnCollisionStay2D(Collision2D other)
+    // 注意：Unity 的触发器回调函数签名要求 Collider2D，而不是 Collision2D。
+    // 触发器生效的基本规则（2D 物理）:
+    //  - 要触发 OnTriggerEnter2D/Stay2D/Exit2D，至少一方必须有 Rigidbody2D（kinematic 或 dynamic），
+    //    且触发器对象的 Collider2D 的 'Is Trigger' 勾选为 true。
+    //  - 常见设置：玩家带 Rigidbody2D（常设为 Kinematic），玩家的 Collider2D 不是触发器；
+    //    可拾取物品或交互体的 Collider2D 设置为 Is Trigger = true，这样玩家就能触发它们的触发器事件。
+    //  - 如果都没有 Rigidbody2D，触发器/碰撞事件不会被调用。
+    //  - 也要检查 Physics2D 的图层碰撞矩阵（Project Settings -> Physics2D）是否允许这两个图层发生碰撞/触发。
+    
+    // 将 Collision2D 改为 Collider2D，确保触发器能被检测到
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.GetComponent<IInteractable>()!=null)
+        Debug.Log("PlayerInteract: OnTriggerStay2D with " + other.gameObject.name);
+        var interactable = other.GetComponent<IInteractable>();
+        if (interactable != null)
         {
-            currentItem = other.gameObject.GetComponent<IInteractable>();
+            // 如果检测到可交互对象，就保存引用（供 TryInteract 使用）
+            currentItem = interactable;
+            InteractableIcon.SetActive(true);
         }
-        
+    }
+
+    // 当离开触发器时清理 currentItem，避免残留引用
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        var interactable = other.GetComponent<IInteractable>();
+        if (interactable != null && currentItem == interactable)
+        {
+            currentItem = null;
+            InteractableIcon.SetActive(false);
+        }
     }
     #endregion
 }

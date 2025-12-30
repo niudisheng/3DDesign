@@ -106,13 +106,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 8
   dashSpeed: 20
-  jumpSpeed: 12
+  jumpSpeed: 16
   playerStateController: {fileID: 6220438208831254281}
   playerInteract: {fileID: 628749057615753688}
   isGrounded: 1
   faceDir: 1
   dashDuration: 0.25
   haveSword: 1
+  _cameraFollowGo: {fileID: 0}
   groundCheckDistance: 0.1
   groundCheckPoint: {fileID: 1022165662729131045}
   groundLayer:
