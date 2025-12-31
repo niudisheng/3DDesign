@@ -1010,6 +1010,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 51999761202820545, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8428103945731767550, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.33
@@ -1067,6 +1071,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: N-Player
       objectReference: {fileID: 0}
+    - target: {fileID: 6691205192061893909, guid: a6257ee89c07cf24cbaf4539c88b1ef9, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6923637282173668924, guid: a6257ee89c07cf24cbaf4539c88b1ef9, type: 3}
       propertyPath: m_LocalPosition.x
       value: -5.33
@@ -1120,6 +1128,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1484132386021603061, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -13.9
+      objectReference: {fileID: 0}
     - target: {fileID: 2144633751029290555, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_Name
       value: Camera
