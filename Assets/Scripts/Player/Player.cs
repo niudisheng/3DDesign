@@ -29,8 +29,8 @@ public class Player : MonoBehaviour
     [Header("Have sword")] 
     public bool haveSword = true;
 
-    
-    
+
+
     [Header("摄像机跟随目标")]
     [SerializeField] private GameObject _cameraFollowGo;
 
@@ -58,6 +58,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         playerStateController.ChangeAnimator(haveSword);
+        SetEndAttack();
     }
 
     void OnEnable()
@@ -91,9 +92,6 @@ public class Player : MonoBehaviour
             CameraManager.instance.LerpYDamping(false);
         }
         
-        // Debug.Log($"Velocity: {rb.velocity.y}, Threshold: {_fallSpeedYDampingChangeThreshold}");
-        // Debug.Log($"IsLerping: {CameraManager.instance.IsLerpingYDamping}");
-        // Debug.Log($"LerpedFromFalling: {CameraManager.instance.LerpedFromPlayerFalling}");
     }
 
     #region Jump
@@ -246,6 +244,13 @@ public class Player : MonoBehaviour
     #endregion
 
     #region Attack
+    
+    private void SetEndAttack()
+    {
+        playerStateController.EndAttack = EndAttack;
+    }
+    
+    
 
     public void TryAttack()
     {
@@ -254,6 +259,7 @@ public class Player : MonoBehaviour
             isAttacking = true;
             playerInteract.Attack(true);
             playerStateController.ChangeState(State.Attack);
+            rb.velocity = new Vector2(0, rb.velocity.y); // 攻击时锁定水平速度
         }
     }
 
