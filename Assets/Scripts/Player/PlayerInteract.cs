@@ -119,7 +119,7 @@ public class PlayerInteract : MonoBehaviour
     // 将 Collision2D 改为 Collider2D，确保触发器能被检测到
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("PlayerInteract: OnTriggerStay2D with " + other.gameObject.name);
+        // Debug.Log("PlayerInteract: OnTriggerStay2D with " + other.gameObject.name);
         var interactable = other.GetComponent<IInteractable>();
         if (interactable != null)
         {
