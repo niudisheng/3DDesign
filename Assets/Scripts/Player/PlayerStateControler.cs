@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using UnityEditor.Animations;
 using UnityEngine;
 
@@ -14,11 +15,14 @@ public class PlayerStateController : MonoBehaviour
         Down,
         Jump,
     }
+    
 
     private State currentState;
     private Animator animator;
     [Header("需要用到的Animator")]
     [SerializeField] private AnimatorController[] _animators;
+
+    public Action EndAttack;
 
     private void Awake()
     {
@@ -37,7 +41,6 @@ public class PlayerStateController : MonoBehaviour
     private void PlayAnimationByState(State state)
     {
         OnDisableAll();
-        // Debug.Log("Player State: " + state);
         animator.SetBool(state.ToString(), true);
     }
 
@@ -76,5 +79,30 @@ public class PlayerStateController : MonoBehaviour
         {
             animator.runtimeAnimatorController = _animators[0];
         }
+    }
+
+    #region Effect
+
+    public enum Effect
+    {
+        SpeedDown,
+    }
+    public void PlayEffect(Effect effect,bool enable)
+    {
+        switch (effect)
+        {
+            case Effect.SpeedDown:
+                Debug.Log("Effect SpeedDown: " + enable);
+                break;
+            default:
+                break;
+        }
+    }
+
+    #endregion
+
+    public void OnEndAttack()
+    {
+        EndAttack?.Invoke();
     }
 }
