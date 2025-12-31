@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Game;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using State = PlayerStateController.State;
@@ -15,18 +16,19 @@ public class Player : MonoBehaviour
 
     private Rigidbody2D rb;
     private PlayerControls controls;
-    public Vector2 moveInputVector2;
-    public bool canJumping = true;
+    private Vector2 moveInputVector2;
+    private bool canJumping = true;
     public bool isGrounded;
     private float jumpCheckDelay = 0.1f;
 
-    public bool isDashing = false;
-
-    public bool isAttacking = false;
-
+    private bool isDashing = false;
+    private bool isAttacking = false;
     public int faceDir = 1; // 1 向右，-1 向左
-
     public float dashDuration = 0.3f;
+
+    [Header("Have sword")] 
+    public bool haveSword = true;
+
     
     
     [Header("摄像机跟随目标")]
@@ -45,18 +47,26 @@ public class Player : MonoBehaviour
         controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
         controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
-
+        controls.Player.Interact.performed += ctx => playerInteract.TryInteract();
         controls.Player.Attack.performed += ctx => TryAttack();
-
         
         _cameraFollowObject= _cameraFollowGo.GetComponent<CameraFollowObject>();
         
         _fallSpeedYDampingChangeThreshold=CameraManager.instance._fallSpeedYDampingChangeThreshold;
-        
-
     }
 
-    void OnEnable() => controls.Player.Enable();
+    private void Start()
+    {
+        playerStateController.ChangeAnimator(haveSword);
+    }
+
+    void OnEnable()
+    {
+        controls.Player.Enable();
+        _cameraFollowObject.SetPlayer(this.transform);
+        
+    }
+
     void OnDisable() => controls.Player.Disable();
 
     void Update()
@@ -67,7 +77,6 @@ public class Player : MonoBehaviour
         {
             StartCoroutine(DownCoroutine());
         }
-        
         
         if (rb.velocity.y < _fallSpeedYDampingChangeThreshold && !CameraManager.instance.IsLerpingYDamping && !CameraManager.instance.LerpedFromPlayerFalling)
         {
@@ -82,10 +91,9 @@ public class Player : MonoBehaviour
             CameraManager.instance.LerpYDamping(false);
         }
         
-        Debug.Log($"Velocity: {rb.velocity.y}, Threshold: {_fallSpeedYDampingChangeThreshold}");
-        Debug.Log($"IsLerping: {CameraManager.instance.IsLerpingYDamping}");
-        Debug.Log($"LerpedFromFalling: {CameraManager.instance.LerpedFromPlayerFalling}");
-        
+        // Debug.Log($"Velocity: {rb.velocity.y}, Threshold: {_fallSpeedYDampingChangeThreshold}");
+        // Debug.Log($"IsLerping: {CameraManager.instance.IsLerpingYDamping}");
+        // Debug.Log($"LerpedFromFalling: {CameraManager.instance.LerpedFromPlayerFalling}");
     }
 
     #region Jump
@@ -142,7 +150,7 @@ public class Player : MonoBehaviour
             yield return null;
         }
 
-        // isJumping = false;
+        playerStateController.DisableState(State.Down);
     }
 
     #endregion
@@ -153,7 +161,7 @@ public class Player : MonoBehaviour
         if (moveInputVector2.x == 0 && isGrounded && CanMove())
         {
             rb.velocity = new Vector2(0, rb.velocity.y);
-            PlayerStateController.Instance.ChangeState(State.Idle);
+            playerStateController.ChangeState(State.Idle);
         }
         else if (CanMove())
         {
@@ -181,17 +189,13 @@ public class Player : MonoBehaviour
         {
             faceDir = 1;
             transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-            
             _cameraFollowObject.CallTurn();
-            
         }
         else if (moveX < -0.1f)
         {
             faceDir = -1;
             transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-            
             _cameraFollowObject.CallTurn();
-            
         }
     }
 
@@ -245,12 +249,40 @@ public class Player : MonoBehaviour
 
     public void TryAttack()
     {
-        if (CanMove())
+        if (CanMove()&&haveSword)
         {
             isAttacking = true;
             playerInteract.Attack(true);
+            playerStateController.ChangeState(State.Attack);
         }
     }
 
+    /// <summary>
+    /// 动画事件调用，结束攻击
+    /// </summary>
+    public void EndAttack()
+    {
+        isAttacking = false;
+        playerInteract.Attack(false);
+        playerStateController.DisableState(State.Attack);
+    }
+
     #endregion
+    
+    /// <summary>
+    /// 玩家获得剑
+    /// </summary>
+    /// <param name="hasSword"></param>
+    public void SetSword(bool hasSword)
+    {
+        haveSword = hasSword;
+        playerStateController.ChangeAnimator(hasSword);
+        
+    }
+    
+    public void GetSword() {
+        
+        SetSword(true);
+    }
+
 }

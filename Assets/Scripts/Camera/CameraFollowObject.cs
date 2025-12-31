@@ -15,7 +15,7 @@ public class CameraFollowObject : MonoBehaviour
     
     private Player _player;
     
-    private int faceDir;
+    public int faceDir;
 
     private void Awake()
     {
@@ -76,6 +76,11 @@ public class CameraFollowObject : MonoBehaviour
             return 180f;
         }
     }
-    
+
+    public void SetPlayer(Transform playerTransform)
+    {
+        _playerTransform = playerTransform;
+    }
+
 
 }

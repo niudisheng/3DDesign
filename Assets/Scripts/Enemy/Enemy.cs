@@ -13,7 +13,7 @@ using Game; // 我们把接口放在 Game 命名空间下（例如 IInteractable
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Enemy : SceneItem, IInteractable, IHurtPlayer
+public class Enemy : SceneItem, IHurtPlayer
 {
     // 基础伤害值，可以在 Inspector 中调整
     [SerializeField]
@@ -138,7 +138,7 @@ public class Enemy : SceneItem, IInteractable, IHurtPlayer
 
     public void Interact(GameObject interactor)
     {
-        Debug.Log($"Enemy: Interact called by {interactor?.name}");
+        return;
     }
 
     // IHurtPlayer 接口实现：对指定 actor 造成伤害（遵循 per-actor 冷却）

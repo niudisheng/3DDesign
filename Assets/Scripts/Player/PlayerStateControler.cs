@@ -1,9 +1,9 @@
 using System;
+using UnityEditor.Animations;
 using UnityEngine;
 
 public class PlayerStateController : MonoBehaviour
 {
-    public static PlayerStateController Instance;
 
     public enum State
     {
@@ -17,20 +17,12 @@ public class PlayerStateController : MonoBehaviour
 
     private State currentState;
     private Animator animator;
+    [Header("需要用到的Animator")]
+    [SerializeField] private AnimatorController[] _animators;
 
     private void Awake()
     {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-
         animator = GetComponent<Animator>();
-        ChangeState(State.Idle);
     }
 
     public void ChangeState(State newState)
@@ -72,5 +64,17 @@ public class PlayerStateController : MonoBehaviour
     {
         Debug.Log("Disable State: " + state);
         animator.SetBool(state.ToString(), false);
+    }
+
+    public void ChangeAnimator(bool havesword)
+    {
+        if (havesword)
+        {
+            animator.runtimeAnimatorController = _animators[1];
+        }
+        else
+        {
+            animator.runtimeAnimatorController = _animators[0];
+        }
     }
 }
