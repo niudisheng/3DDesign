@@ -20,6 +20,7 @@ public class FragileTile : Tile
     // 当使用 isTrigger = true 的 collider 时，会调用此方法
     protected override void OnEnterTrigger(Collider2D other)
     {
+        Debug.LogWarning("FragileTile triggered by " + other.gameObject.name);
         // 如果已经在淡出中，忽略重复触发
         if (_fadeCoroutine != null) return;
 
@@ -55,8 +56,7 @@ public class FragileTile : Tile
             Color snap = startColor;
             snap.a = 0f;
             _tilemapRenderer.color = snap;
-
-            // Destroy the Tilemap's GameObject (or this GameObject as a fallback)
+            
             if (_tilemapRenderer != null)
                 Destroy(_tilemapRenderer.gameObject);
             else

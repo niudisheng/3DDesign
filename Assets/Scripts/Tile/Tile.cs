@@ -19,10 +19,6 @@ public abstract class Tile : MonoBehaviour
 
     protected virtual void OnCollisionEnter2D(Collision2D other)
     {
-        Debug.Log($"[Tile] OnCollisionEnter2D called on '{gameObject.name}' with '{other.gameObject.name}'. Components: " +
-                  $"HasCollider={(GetComponent<Collider2D>()!=null)}, IsTrigger={GetComponent<Collider2D>()?.isTrigger}, " +
-                  $"OtherHasRigidbody={(other.rigidbody!=null)}, OtherIsTrigger={other.collider?.isTrigger}");
-
         if (other.gameObject.CompareTag("Player"))
         {
             OnEnter(other);

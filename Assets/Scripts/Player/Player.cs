@@ -11,28 +11,34 @@ public class Player : MonoBehaviour
     [Header("Movement Settings")] public float moveSpeed = 5f;
     public float dashSpeed = 10f;
     public float jumpSpeed = 12f;
-    public PlayerStateController playerStateController;
-    public PlayerInteract playerInteract;
 
+    // 运动相关
     private Rigidbody2D rb;
     private PlayerControls controls;
     private Vector2 moveInputVector2;
+
+    [Header("必要项设置")] public PlayerStateController playerStateController;
+    public PlayerInteract playerInteract;
+    private Transform SpriteTransform;
+
+    #region 状态相关变量
+
     private bool canJumping = true;
-    public bool isGrounded;
+    private bool isGrounded;
     private float jumpCheckDelay = 0.1f;
 
     private bool isDashing = false;
     private bool isAttacking = false;
+    [HideInInspector]
     public int faceDir = 1; // 1 向右，-1 向左
-    public float dashDuration = 0.3f;
+    public float dashDuration = 0.25f;
 
-    [Header("Have sword")] 
-    public bool haveSword = true;
+    [Header("Have sword")] public bool haveSword = true;
+
+    #endregion
 
 
-
-    [Header("摄像机跟随目标")]
-    [SerializeField] private GameObject _cameraFollowGo;
+    [Header("摄像机跟随目标")] [SerializeField] private GameObject _cameraFollowGo;
 
     private CameraFollowObject _cameraFollowObject;
     private float _fallSpeedYDampingChangeThreshold;
@@ -40,6 +46,7 @@ public class Player : MonoBehaviour
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        SpriteTransform = playerStateController.transform;
         controls = new PlayerControls();
 
         // 监听输入
@@ -49,15 +56,16 @@ public class Player : MonoBehaviour
         controls.Player.Dash.performed += ctx => TryDash();
         controls.Player.Interact.performed += ctx => playerInteract.TryInteract();
         controls.Player.Attack.performed += ctx => TryAttack();
-        
-        _cameraFollowObject= _cameraFollowGo.GetComponent<CameraFollowObject>();
-        
-        _fallSpeedYDampingChangeThreshold=CameraManager.instance._fallSpeedYDampingChangeThreshold;
+
+        _cameraFollowObject = _cameraFollowGo.GetComponent<CameraFollowObject>();
+
+        _fallSpeedYDampingChangeThreshold = CameraManager.instance._fallSpeedYDampingChangeThreshold;
     }
 
     private void Start()
     {
         playerStateController.ChangeAnimator(haveSword);
+        
         SetEndAttack();
     }
 
@@ -65,7 +73,6 @@ public class Player : MonoBehaviour
     {
         controls.Player.Enable();
         _cameraFollowObject.SetPlayer(this.transform);
-        
     }
 
     void OnDisable() => controls.Player.Disable();
@@ -78,20 +85,21 @@ public class Player : MonoBehaviour
         {
             StartCoroutine(DownCoroutine());
         }
-        
-        if (rb.velocity.y < _fallSpeedYDampingChangeThreshold && !CameraManager.instance.IsLerpingYDamping && !CameraManager.instance.LerpedFromPlayerFalling)
+
+        if (rb.velocity.y < _fallSpeedYDampingChangeThreshold && !CameraManager.instance.IsLerpingYDamping &&
+            !CameraManager.instance.LerpedFromPlayerFalling)
         {
             CameraManager.instance.LerpYDamping(true);
         }
 
 
-        if (rb.velocity.y >= 0f && !CameraManager.instance.IsLerpingYDamping && CameraManager.instance.LerpedFromPlayerFalling)
+        if (rb.velocity.y >= 0f && !CameraManager.instance.IsLerpingYDamping &&
+            CameraManager.instance.LerpedFromPlayerFalling)
         {
             //reset so it can be called again
             CameraManager.instance.LerpedFromPlayerFalling = false;
             CameraManager.instance.LerpYDamping(false);
         }
-        
     }
 
     #region Jump
@@ -125,8 +133,7 @@ public class Player : MonoBehaviour
             yield return new WaitForSeconds(jumpCheckDelay);
         }
 
-        // 当上升到顶点速度变为0（或以下）时，切换到下落状态
-        playerStateController.ChangeState(State.Down);
+        
 
         // 等待落地
         while (!isGrounded)
@@ -186,13 +193,13 @@ public class Player : MonoBehaviour
         if (moveX > 0.1f)
         {
             faceDir = 1;
-            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            SpriteTransform.rotation = Quaternion.Euler(0f, 0f, 0f);
             _cameraFollowObject.CallTurn();
         }
         else if (moveX < -0.1f)
         {
             faceDir = -1;
-            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            SpriteTransform.rotation = Quaternion.Euler(0f, 180f, 0f);
             _cameraFollowObject.CallTurn();
         }
     }
@@ -244,17 +251,16 @@ public class Player : MonoBehaviour
     #endregion
 
     #region Attack
-    
+
     private void SetEndAttack()
     {
         playerStateController.EndAttack = EndAttack;
     }
-    
-    
+
 
     public void TryAttack()
     {
-        if (CanMove()&&haveSword)
+        if (CanMove() && haveSword)
         {
             isAttacking = true;
             playerInteract.Attack(true);
@@ -274,7 +280,7 @@ public class Player : MonoBehaviour
     }
 
     #endregion
-    
+
     /// <summary>
     /// 玩家获得剑
     /// </summary>
@@ -283,12 +289,10 @@ public class Player : MonoBehaviour
     {
         haveSword = hasSword;
         playerStateController.ChangeAnimator(hasSword);
-        
-    }
-    
-    public void GetSword() {
-        
-        SetSword(true);
     }
 
+    public void GetSword()
+    {
+        SetSword(true);
+    }
 }
