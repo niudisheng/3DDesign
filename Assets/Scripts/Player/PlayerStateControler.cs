@@ -49,7 +49,7 @@ public class PlayerStateController : MonoBehaviour
         foreach (State state in Enum.GetValues(typeof(State)))
         {
             // 冲刺动画保证最高优先级，不会被其他动画打断
-            if (state == State.Dash)
+            if (state == State.Dash|| state == State.Attack)
             {
                 continue;
             }
