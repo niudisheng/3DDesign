@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Game;
 using UnityEngine;
 
+
 public class Sword : SceneItem,IInteractable
 {
     public void OnPlayerEnter(GameObject Player)
@@ -20,7 +21,7 @@ public class Sword : SceneItem,IInteractable
         GameManager.Instance.ChangePlayer();
     }
 
-    public void Interact(GameObject interactor)
+    public void Interact(GameObject gameObject)
     {
         
 

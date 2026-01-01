@@ -5,7 +5,8 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
 
-    public Player player;
+    public GameObject player;
+    public SaveData saveData;
     public static GameManager Instance { get; private set; }
     private void Awake()
     {
@@ -22,6 +23,16 @@ public class GameManager : MonoBehaviour
     
     public void ChangePlayer()
     {
-        player.GetSword();
+        player.GetComponent<Player>().GetSword();
+    }
+    public void SaveGame(GameObject player)
+    {
+        saveData = SaveData.SavePlayerState(player);
+        // 实现保存游戏逻辑
+        
+    }
+    public void LoadGame()
+    {
+        player.GetComponent<PlayerInteract>().InitPlayer(saveData);
     }
 }

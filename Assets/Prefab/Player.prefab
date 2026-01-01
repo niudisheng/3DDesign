@@ -139,7 +139,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5500032196799718552}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 7.3, y: -0.2, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
@@ -167,7 +167,6 @@ MonoBehaviour:
   jumpSpeed: 16
   playerStateController: {fileID: 2778172300095362428}
   playerInteract: {fileID: 4794785165894857012}
-  isGrounded: 1
   faceDir: 1
   dashDuration: 0.25
   haveSword: 0
@@ -211,7 +210,7 @@ Rigidbody2D:
   m_LinearDrag: 0.1
   m_AngularDrag: 0.05
   m_GravityScale: 3.5
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: c8870a84883b69e4299560a3847eaeb4, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0

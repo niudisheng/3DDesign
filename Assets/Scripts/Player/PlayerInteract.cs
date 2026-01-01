@@ -27,7 +27,7 @@ public class PlayerInteract : MonoBehaviour
 
     
 
-    #region 受伤代码
+    #region 受伤与死亡代码
     
     public void Hurt(int damage)
     {
@@ -54,6 +54,11 @@ public class PlayerInteract : MonoBehaviour
     {
         Debug.Log("Player: Died");
         // TODO: add death handling (respawn, disable input, animation, etc.)
+    }
+
+    public void InitPlayer(SaveData saveData)
+    {
+        currentHealth = maxHealth;
     }
 
     #endregion

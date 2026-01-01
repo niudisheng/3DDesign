@@ -8,9 +8,9 @@ using State = PlayerStateController.State;
 [RequireComponent(typeof(Rigidbody2D))]
 public class Player : MonoBehaviour
 {
-    [Header("Movement Settings")] public float moveSpeed = 5f;
-    public float dashSpeed = 10f;
-    public float jumpSpeed = 12f;
+    [Header("Movement Settings")] public float moveSpeed = 8f;
+    public float dashSpeed = 20f;
+    public float jumpSpeed = 16f;
 
     // 运动相关
     private Rigidbody2D rb;
@@ -29,8 +29,7 @@ public class Player : MonoBehaviour
 
     private bool isDashing = false;
     private bool isAttacking = false;
-    [HideInInspector]
-    public int faceDir = 1; // 1 向右，-1 向左
+    [HideInInspector] public int faceDir = 1; // 1 向右，-1 向左
     public float dashDuration = 0.25f;
 
     [Header("Have sword")] public bool haveSword = true;
@@ -65,7 +64,7 @@ public class Player : MonoBehaviour
     private void Start()
     {
         playerStateController.ChangeAnimator(haveSword);
-        
+
         SetEndAttack();
     }
 
@@ -133,7 +132,6 @@ public class Player : MonoBehaviour
             yield return new WaitForSeconds(jumpCheckDelay);
         }
 
-        
 
         // 等待落地
         while (!isGrounded)
@@ -154,6 +152,7 @@ public class Player : MonoBehaviour
         {
             yield return null;
         }
+        canJumping = true;
 
         playerStateController.DisableState(State.Down);
     }
@@ -262,6 +261,7 @@ public class Player : MonoBehaviour
     {
         if (CanMove() && haveSword)
         {
+            Debug.Log("Player: TryAttack");
             isAttacking = true;
             playerInteract.Attack(true);
             playerStateController.ChangeState(State.Attack);
@@ -274,6 +274,7 @@ public class Player : MonoBehaviour
     /// </summary>
     public void EndAttack()
     {
+        Debug.Log("Player: EndAttack");
         isAttacking = false;
         playerInteract.Attack(false);
         playerStateController.DisableState(State.Attack);
