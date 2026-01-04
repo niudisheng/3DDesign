@@ -23,5 +23,6 @@ public class SavePoint : SceneItem,IInteractable
     public void Interact(GameObject gameObject)
     {
         GameManager.Instance.SaveGame(gameObject);
+        
     }
 }

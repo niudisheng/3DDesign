@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
     {
         saveData = SaveData.SavePlayerState(player);
         // 实现保存游戏逻辑
-        
+        Debug.LogWarning("玩家成功存档");
     }
     public void LoadGame()
     {

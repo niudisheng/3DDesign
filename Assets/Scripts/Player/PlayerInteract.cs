@@ -53,12 +53,15 @@ public class PlayerInteract : MonoBehaviour
     private void Die()
     {
         Debug.Log("Player: Died");
-        // TODO: add death handling (respawn, disable input, animation, etc.)
+        
+        GameManager.Instance.LoadGame();
+        
     }
 
     public void InitPlayer(SaveData saveData)
     {
         currentHealth = maxHealth;
+        transform.position = saveData.playerPosition;
     }
 
     #endregion
