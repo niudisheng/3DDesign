@@ -137,7 +137,7 @@ public class Player : MonoBehaviour
     #endregion
 
     #region 死亡与重生
-    
+    [ContextMenu("Test Die")]
     public void OnDie()
     {
         // 清理状态（立即禁用控制以防止中途操作）
