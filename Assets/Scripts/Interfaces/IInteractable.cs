@@ -11,6 +11,11 @@ namespace Game
         void OnPlayerEnter(GameObject Player);
         void OnPlayerExit(GameObject interactor);
         void Interact();
+        
+        /// <summary>
+        /// 疑似多余方法，保留以防万一
+        /// </summary>
+        /// <param name="gameObject"></param>
         void Interact(GameObject gameObject);
     }
 }

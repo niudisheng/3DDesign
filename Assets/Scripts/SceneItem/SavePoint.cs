@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class SavePoint : SceneItem,IInteractable
 {
+    public GameObject campFire;
     public void OnPlayerEnter(GameObject player)
     {
         
@@ -17,12 +18,12 @@ public class SavePoint : SceneItem,IInteractable
 
     public void Interact()
     {
-        throw new System.NotImplementedException();
+        campFire.SetActive(true);
+        GameManager.Instance.SaveGame(Player.instance.gameObject);
     }
 
     public void Interact(GameObject gameObject)
     {
-        GameManager.Instance.SaveGame(gameObject);
-        
+        throw new System.NotImplementedException();
     }
 }

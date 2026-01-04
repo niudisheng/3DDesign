@@ -25,7 +25,17 @@ public class PlayerInteract : MonoBehaviour
     // attack id generator: increments each attack activation so enemies can dedupe by this id
     private int currentAttackId = 0;
 
-    
+    private void OnEnable()
+    {
+        InteractableIcon.SetActive(false);
+        InitPlayer();
+    }
+
+    private void OnDisable()
+    {
+        InteractableIcon.SetActive(false);
+    }
+
 
     #region 受伤与死亡代码
     
@@ -53,15 +63,14 @@ public class PlayerInteract : MonoBehaviour
     private void Die()
     {
         Debug.Log("Player: Died");
-        
+        Player.instance.OnDie();
         GameManager.Instance.LoadGame();
         
     }
 
-    public void InitPlayer(SaveData saveData)
+    public void InitPlayer()
     {
         currentHealth = maxHealth;
-        transform.position = saveData.playerPosition;
     }
 
     #endregion
@@ -101,11 +110,7 @@ public class PlayerInteract : MonoBehaviour
     #region Interact
     private  IInteractable currentItem;
     [SerializeField, Tooltip("可交互标识")] private GameObject InteractableIcon;
-
-    private void Start()
-    {
-        InteractableIcon.SetActive(false);
-    }
+    
 
     public void TryInteract()
     {

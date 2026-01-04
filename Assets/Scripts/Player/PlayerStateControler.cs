@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Net;
+using Unity.VisualScripting;
 using UnityEditor.Animations;
 using UnityEngine;
 
@@ -19,15 +21,24 @@ public class PlayerStateController : MonoBehaviour
 
     private State currentState;
     private Animator animator;
+    private Rigidbody2D rb; // ...existing code... (moved initialization to Start)
+    private PlayerController playerController;
+    
     [Header("需要用到的Animator")]
     [SerializeField] private AnimatorController[] _animators;
 
     public Action EndAttack;
 
-    private void Awake()
+    private void Start()
     {
-        animator = GetComponent<Animator>();
+        animator = Player.instance.animator;
+        rb = Player.instance.rb; // cache rb here instead of at field init
+        playerController = Player.instance.playerController; // cache playerController for shorter access
     }
+
+    // Helper properties to make long expressions concise and readable
+    private float MoveInputX => playerController != null ? playerController.moveInputVector2.x : 0f;
+
 
     public void ChangeState(State newState)
     {
@@ -105,4 +116,7 @@ public class PlayerStateController : MonoBehaviour
     {
         EndAttack?.Invoke();
     }
+    
+    
+    
 }

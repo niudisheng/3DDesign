@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
 
-    public GameObject player;
+    public Player player;
     public SaveData saveData;
     public static GameManager Instance { get; private set; }
     private void Awake()
@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
     
     public void ChangePlayer()
     {
-        player.GetComponent<Player>().GetSword();
+        player.GetSword();
     }
     public void SaveGame(GameObject player)
     {
@@ -33,6 +33,6 @@ public class GameManager : MonoBehaviour
     }
     public void LoadGame()
     {
-        player.GetComponent<PlayerInteract>().InitPlayer(saveData);
+        player.OnRespawn(saveData);
     }
 }

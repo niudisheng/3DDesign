@@ -3,69 +3,73 @@ using System.Collections;
 using Game;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using State = PlayerStateController.State;
+
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class Player : MonoBehaviour
 {
-    [Header("Movement Settings")] public float moveSpeed = 8f;
-    public float dashSpeed = 20f;
-    public float jumpSpeed = 16f;
+    public static Player instance;
 
     // 运动相关
-    private Rigidbody2D rb;
-    private PlayerControls controls;
-    private Vector2 moveInputVector2;
 
-    [Header("必要项设置")] public PlayerStateController playerStateController;
+
+    [Header("公共变量")] 
+    [HideInInspector] public Rigidbody2D rb;
+    public PlayerStateController playerStateController;
     public PlayerInteract playerInteract;
-    private Transform SpriteTransform;
-
-    #region 状态相关变量
-
-    private bool canJumping = true;
-    private bool isGrounded;
-    private float jumpCheckDelay = 0.1f;
-
-    private bool isDashing = false;
-    private bool isAttacking = false;
+    [HideInInspector] public Animator animator;
+    [HideInInspector] public PlayerControls controls;
     [HideInInspector] public int faceDir = 1; // 1 向右，-1 向左
-    public float dashDuration = 0.25f;
+    public PlayerController playerController;
+    private Transform SpriteTransform;
+    
+
 
     [Header("Have sword")] public bool haveSword = true;
-
-    #endregion
-
 
     [Header("摄像机跟随目标")] [SerializeField] private GameObject _cameraFollowGo;
 
     private CameraFollowObject _cameraFollowObject;
     private float _fallSpeedYDampingChangeThreshold;
 
+    private int _dieTriggerHash;
+    private int _wakeTriggerHash;
+
     void Awake()
     {
+        // 单例
+        if (instance == null)
+        {
+            instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
         rb = GetComponent<Rigidbody2D>();
+        animator = GetComponentInChildren<Animator>();
         SpriteTransform = playerStateController.transform;
         controls = new PlayerControls();
 
-        // 监听输入
-        controls.Player.Move.performed += ctx => moveInputVector2 = ctx.ReadValue<Vector2>();
-        controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
-        controls.Player.Jump.performed += ctx => TryJump();
-        controls.Player.Dash.performed += ctx => TryDash();
-        controls.Player.Interact.performed += ctx => playerInteract.TryInteract();
-        controls.Player.Attack.performed += ctx => TryAttack();
 
         _cameraFollowObject = _cameraFollowGo.GetComponent<CameraFollowObject>();
 
         _fallSpeedYDampingChangeThreshold = CameraManager.instance._fallSpeedYDampingChangeThreshold;
+
+        // 缓存 trigger 的哈希，避免字符串查找
+        _dieTriggerHash = Animator.StringToHash("Die");
+        _wakeTriggerHash = Animator.StringToHash("Wake");
     }
 
     private void Start()
     {
         playerStateController.ChangeAnimator(haveSword);
+    }
 
-        SetEndAttack();
+    private void Update()
+    {
+        CameraDownCheck();
     }
 
     void OnEnable()
@@ -76,15 +80,9 @@ public class Player : MonoBehaviour
 
     void OnDisable() => controls.Player.Disable();
 
-    void Update()
-    {
-        CheckGround();
-        // 混用跳跃过程，防止空中再次跳
-        if (rb.velocity.y < 0f && !isGrounded)
-        {
-            StartCoroutine(DownCoroutine());
-        }
 
+    private void CameraDownCheck()
+    {
         if (rb.velocity.y < _fallSpeedYDampingChangeThreshold && !CameraManager.instance.IsLerpingYDamping &&
             !CameraManager.instance.LerpedFromPlayerFalling)
         {
@@ -100,94 +98,9 @@ public class Player : MonoBehaviour
             CameraManager.instance.LerpYDamping(false);
         }
     }
-
-    #region Jump
-
-    private void TryJump()
+    
+    public void ChangeDir(float moveX)
     {
-        if (canJumping)
-        {
-            Jump();
-        }
-    }
-
-    private void Jump()
-    {
-        isGrounded = false;
-        rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
-        playerStateController.ChangeState(State.Jump);
-        StartCoroutine(JumpCoroutine());
-    }
-
-    // 本质是一个判断空中的过程，速度快往上
-    private IEnumerator JumpCoroutine()
-    {
-        canJumping = false;
-
-
-        // 持续检测竖直速度，直到开始下落
-        while (rb.velocity.y >= 0f && !isGrounded)
-        {
-            playerStateController.ChangeState(State.Jump);
-            yield return new WaitForSeconds(jumpCheckDelay);
-        }
-
-
-        // 等待落地
-        while (!isGrounded)
-        {
-            yield return null;
-        }
-
-        canJumping = true;
-    }
-
-    private IEnumerator DownCoroutine()
-    {
-        // 当上升到顶点速度变为0（或以下）时，切换到下落状态
-        playerStateController.ChangeState(State.Down);
-
-        // 等待落地
-        while (!isGrounded)
-        {
-            yield return null;
-        }
-        canJumping = true;
-
-        playerStateController.DisableState(State.Down);
-    }
-
-    #endregion
-
-
-    void FixedUpdate()
-    {
-        if (moveInputVector2.x == 0 && isGrounded && CanMove())
-        {
-            rb.velocity = new Vector2(0, rb.velocity.y);
-            playerStateController.ChangeState(State.Idle);
-        }
-        else if (CanMove())
-        {
-            Move(); // 冲刺时禁止 Move()
-        }
-    }
-
-    private bool CanMove()
-    {
-        return !isDashing && !isAttacking;
-    }
-
-    private void Move()
-    {
-        if (isGrounded)
-        {
-            playerStateController.ChangeState(State.Walk);
-        }
-
-        float moveX = moveInputVector2.x * moveSpeed;
-        rb.velocity = new Vector2(moveX, rb.velocity.y);
-
         // 翻转朝向（只有移动时才改变）
         if (moveX > 0.1f)
         {
@@ -203,84 +116,8 @@ public class Player : MonoBehaviour
         }
     }
 
-    #region Dash
 
-    private void TryDash()
-    {
-        if (CanMove())
-            StartCoroutine(DashCoroutine());
-    }
-
-    private IEnumerator DashCoroutine()
-    {
-        isDashing = true;
-        rb.velocity = new Vector2(faceDir * dashSpeed, 0f); // 冲刺锁定方向，并锁 y
-        playerStateController.ChangeState(State.Dash);
-        yield return new WaitForSeconds(dashDuration);
-        playerStateController.DisableState(State.Dash);
-        isDashing = false;
-    }
-
-    #endregion
-
-
-    #region Ground Check
-
-    [Header("Ground Settings")] public float groundCheckDistance = 0.1f;
-    public Transform groundCheckPoint; // 脚底检测点
-    public LayerMask groundLayer;
-
-    // public bool IsGrounded { get; private set; }
-
-
-    private void CheckGround()
-    {
-        // 射线向下检测
-        RaycastHit2D hit = Physics2D.Raycast(groundCheckPoint.position, Vector2.down, groundCheckDistance, groundLayer);
-        // Debug.Log(hit.collider);
-
-        isGrounded = hit.collider != null;
-
-
-        // 可视化射线
-        Color color = isGrounded ? Color.green : Color.red;
-        Debug.DrawRay(groundCheckPoint.position, Vector2.down * groundCheckDistance, color);
-    }
-
-    #endregion
-
-    #region Attack
-
-    private void SetEndAttack()
-    {
-        playerStateController.EndAttack = EndAttack;
-    }
-
-
-    public void TryAttack()
-    {
-        if (CanMove() && haveSword)
-        {
-            Debug.Log("Player: TryAttack");
-            isAttacking = true;
-            playerInteract.Attack(true);
-            playerStateController.ChangeState(State.Attack);
-            rb.velocity = new Vector2(0, rb.velocity.y); // 攻击时锁定水平速度
-        }
-    }
-
-    /// <summary>
-    /// 动画事件调用，结束攻击
-    /// </summary>
-    public void EndAttack()
-    {
-        Debug.Log("Player: EndAttack");
-        isAttacking = false;
-        playerInteract.Attack(false);
-        playerStateController.DisableState(State.Attack);
-    }
-
-    #endregion
+    #region 剑代码
 
     /// <summary>
     /// 玩家获得剑
@@ -296,4 +133,98 @@ public class Player : MonoBehaviour
     {
         SetSword(true);
     }
+
+    #endregion
+
+    #region 死亡与重生
+    
+    public void OnDie()
+    {
+        // 清理状态（立即禁用控制以防止中途操作）
+        playerStateController.enabled = false;
+        playerController.enabled = false;
+        playerInteract.enabled = false;
+        rb.velocity = Vector2.zero;
+        // 播放死亡动画（使用哈希触发器更高效）
+        animator.SetTrigger(_dieTriggerHash);
+
+        // 最佳做法：在动画剪辑末端添加一个 Animation Event 调用 `OnDieAnimationEnd`。
+        // 如果你没有添加事件，下面的 coroutine 会作为回退路径，在状态结束后执行。
+        StartCoroutine(WaitForAnimationEnd("Die", () =>
+        {
+            // 如果动画事件没有调用，这里会作为回退执行
+            GameManager.Instance.LoadGame();
+        }));
+    }
+    
+    public void OnRespawn(SaveData saveData)
+    {
+        // 将玩家移动到存档位置（先设置位置以便重生动画以正确位置播放）
+        transform.position = saveData.playerPosition;
+
+        // 保持控制器禁用，直到重生动画播完
+        playerStateController.enabled = false;
+        playerController.enabled = false;
+        playerInteract.enabled = false;
+
+        // 播放重生动画
+        animator.SetTrigger(_wakeTriggerHash);
+
+        // 推荐在 Wake 动画末尾添加 Animation Event 调用 `OnWakeAnimationEnd`。
+        // 同时保留 coroutine 回退机制。
+        StartCoroutine(WaitForAnimationEnd("Wake", () =>
+        {
+            playerStateController.enabled = true;
+            playerController.enabled = true;
+            playerInteract.enabled = true;
+        }));
+    }
+
+    // 等待指定动画状态播放完毕（基于 state name）
+    private IEnumerator WaitForAnimationEnd(string stateName, Action onComplete)
+    {
+        // 等待动画状态进入
+        float enterTimeout = 2f;
+        float timer = 0f;
+        while (!animator.GetCurrentAnimatorStateInfo(0).IsName(stateName) && timer < enterTimeout)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        // 如果没进入指定状态，则直接触发回调以避免无限等待
+        if (!animator.GetCurrentAnimatorStateInfo(0).IsName(stateName))
+        {
+            onComplete?.Invoke();
+            yield break;
+        }
+
+        // 等待动画播放完毕（normalizedTime >= 1 表示播放结束，但如果设置了 Loop 则不会为 >=1）
+        float playTimeout = 10f; // 额外保险超时
+        timer = 0f;
+        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f && timer < playTimeout)
+        {
+            timer += Time.deltaTime;
+            yield return null;
+        }
+
+        onComplete?.Invoke();
+    }
+    
+    
+    // 可被 Animation Event 调用：当 Die 动画在最后一帧设置 event 调用此方法
+    public void OnDieAnimationEnd()
+    {
+        GameManager.Instance.LoadGame();
+    }
+
+    // 可被 Animation Event 调用：当 Wake 动画在最后一帧设置 event 调用此方法
+    public void OnWakeAnimationEnd()
+    {
+        playerStateController.enabled = true;
+        playerController.enabled = true;
+        playerInteract.enabled = true;
+    }
+
+    #endregion
 }

@@ -122,6 +122,7 @@ GameObject:
   - component: {fileID: 4818284192482317421}
   - component: {fileID: 4296682097917363154}
   - component: {fileID: 4794785165894857012}
+  - component: {fileID: 6280497588084587949}
   - component: {fileID: 7451530972892599132}
   - component: {fileID: 3599272434690541614}
   m_Layer: 0
@@ -162,20 +163,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faa18bdec81c8fb42965c22c93135c64, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 8
-  dashSpeed: 20
-  jumpSpeed: 16
+  rb: {fileID: 0}
   playerStateController: {fileID: 2778172300095362428}
   playerInteract: {fileID: 4794785165894857012}
+  animator: {fileID: 0}
   faceDir: 1
-  dashDuration: 0.25
+  playerController: {fileID: 6280497588084587949}
   haveSword: 0
   _cameraFollowGo: {fileID: 0}
-  groundCheckDistance: 0.1
-  groundCheckPoint: {fileID: 3300256197303706793}
-  groundLayer:
-    serializedVersion: 2
-    m_Bits: 64
 --- !u!114 &4794785165894857012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194,6 +189,30 @@ MonoBehaviour:
   invincibleDuration: 1
   attackDamage: 10
   InteractableIcon: {fileID: 7016098376676817268}
+--- !u!114 &6280497588084587949
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5500032196799718552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6494ba4c673e6254e8ca3c403e1cb506, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 8
+  dashSpeed: 20
+  jumpSpeed: 16
+  moveInputVector2: {x: 0, y: 0}
+  dashDuration: 0.25
+  canJumping: 1
+  isGrounded: 0
+  groundCheckDistance: 0.1
+  groundCheckPoint: {fileID: 3300256197303706793}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!50 &7451530972892599132
 Rigidbody2D:
   serializedVersion: 4
