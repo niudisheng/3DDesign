@@ -3,6 +3,7 @@ using System.Collections;
 using Game;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -21,7 +22,8 @@ public class Player : MonoBehaviour
     [HideInInspector] public PlayerControls controls;
     [HideInInspector] public int faceDir = 1; // 1 向右，-1 向左
     public PlayerController playerController;
-    private Transform SpriteTransform;
+
+    private Transform _spriteTransform;
     
 
 
@@ -34,6 +36,10 @@ public class Player : MonoBehaviour
 
     private int _dieTriggerHash;
     private int _wakeTriggerHash;
+
+    // 新增：是否锁定其他模块（死亡/重生期间）
+    private bool _modulesLocked;
+    public bool ModulesLocked => _modulesLocked;
 
     void Awake()
     {
@@ -49,7 +55,7 @@ public class Player : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponentInChildren<Animator>();
-        SpriteTransform = playerStateController.transform;
+        _spriteTransform = playerStateController != null ? playerStateController.transform : this.transform;
         controls = new PlayerControls();
 
 
@@ -74,12 +80,60 @@ public class Player : MonoBehaviour
 
     void OnEnable()
     {
-        controls.Player.Enable();
+        // 只有在没有被模块锁定时才启用输入，否则保持禁用，避免在重生/死亡时收到输入
+        if (controls == null) controls = new PlayerControls();
+        if (!_modulesLocked)
+            controls.Player.Enable();
         _cameraFollowObject.SetPlayer(this.transform);
     }
 
     void OnDisable() => controls.Player.Disable();
 
+    // 锁定（禁用）其它模块：输入、控制器、交互和物理仿真（可选）
+    private void LockModules()
+    {
+        if (_modulesLocked) return;
+        _modulesLocked = true;
+
+        try { controls?.Player.Disable(); } catch (Exception ex) { Debug.LogWarning($"Failed to disable controls: {ex}"); }
+
+        if (playerController != null)
+            playerController.enabled = false;
+
+        if (playerStateController != null)
+            playerStateController.enabled = false;
+
+        if (playerInteract != null)
+            playerInteract.enabled = false;
+
+        // 停止物理仿真，避免在死亡/重生期间被外力影响（在 Unlock 时恢复）
+        if (rb != null)
+        {
+            rb.velocity = Vector2.zero;
+            rb.simulated = false;
+        }
+    }
+
+    // 恢复模块
+    private void UnlockModules()
+    {
+        if (!_modulesLocked) return;
+        _modulesLocked = false;
+
+        try { controls?.Player.Enable(); } catch (Exception ex) { Debug.LogWarning($"Failed to enable controls: {ex}"); }
+
+        if (playerController != null)
+            playerController.enabled = true;
+
+        if (playerStateController != null)
+            playerStateController.enabled = true;
+
+        if (playerInteract != null)
+            playerInteract.enabled = true;
+
+        if (rb != null)
+            rb.simulated = true;
+    }
 
     private void CameraDownCheck()
     {
@@ -105,13 +159,13 @@ public class Player : MonoBehaviour
         if (moveX > 0.1f)
         {
             faceDir = 1;
-            SpriteTransform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            _spriteTransform.rotation = Quaternion.Euler(0f, 0f, 0f);
             _cameraFollowObject.CallTurn();
         }
         else if (moveX < -0.1f)
         {
             faceDir = -1;
-            SpriteTransform.rotation = Quaternion.Euler(0f, 180f, 0f);
+            _spriteTransform.rotation = Quaternion.Euler(0f, 180f, 0f);
             _cameraFollowObject.CallTurn();
         }
     }
@@ -140,10 +194,11 @@ public class Player : MonoBehaviour
     [ContextMenu("Test Die")]
     public void OnDie()
     {
+        // 立即锁定其它模块，防止在死亡动画或流程中任何输入/控制/交互发生
+        LockModules();
+
         // 清理状态（立即禁用控制以防止中途操作）
-        playerStateController.enabled = false;
-        playerController.enabled = false;
-        playerInteract.enabled = false;
+
         rb.velocity = Vector2.zero;
         // 播放死亡动画（使用哈希触发器更高效）
         animator.SetTrigger(_dieTriggerHash);
@@ -159,13 +214,23 @@ public class Player : MonoBehaviour
     
     public void OnRespawn(SaveData saveData)
     {
+        Debug.Log("Player: OnRespawn called");
+        // 在重生开始时也锁住模块，直到重生动画完全结束再恢复
+        LockModules();
+
         // 将玩家移动到存档位置（先设置位置以便重生动画以正确位置播放）
+        if (rb != null)
+        {
+            // 如果物理被禁用了，先确保位置直接设置
+            rb.simulated = false;
+        }
+
         transform.position = saveData.playerPosition;
 
-        // 保持控制器禁用，直到重生动画播完
-        playerStateController.enabled = false;
-        playerController.enabled = false;
-        playerInteract.enabled = false;
+        // 清理速度以免残留
+        if (rb != null) rb.velocity = Vector2.zero;
+
+
 
         // 播放重生动画
         animator.SetTrigger(_wakeTriggerHash);
@@ -174,10 +239,22 @@ public class Player : MonoBehaviour
         // 同时保留 coroutine 回退机制。
         StartCoroutine(WaitForAnimationEnd("Wake", () =>
         {
-            playerStateController.enabled = true;
-            playerController.enabled = true;
-            playerInteract.enabled = true;
+            // 动画结束后恢复模块
+            UnlockModules();
         }));
+    }
+
+    // 动画事件回调：在 Die 动画末尾调用（比 coroutine 更可靠）
+    public void OnDieAnimationEnd()
+    {
+        // 确保在动画结束时触发场景/存档加载
+        GameManager.Instance.LoadGame();
+    }
+    
+    // 动画事件回调：在 Wake 动画末尾调用以恢复模块
+    public void OnWakeAnimationEnd()
+    {
+        UnlockModules();
     }
 
     // 等待指定动画状态播放完毕（基于 state name）
@@ -211,20 +288,6 @@ public class Player : MonoBehaviour
         onComplete?.Invoke();
     }
     
-    
-    // 可被 Animation Event 调用：当 Die 动画在最后一帧设置 event 调用此方法
-    public void OnDieAnimationEnd()
-    {
-        GameManager.Instance.LoadGame();
-    }
-
-    // 可被 Animation Event 调用：当 Wake 动画在最后一帧设置 event 调用此方法
-    public void OnWakeAnimationEnd()
-    {
-        playerStateController.enabled = true;
-        playerController.enabled = true;
-        playerInteract.enabled = true;
-    }
 
     #endregion
 }

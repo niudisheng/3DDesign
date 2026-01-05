@@ -8,6 +8,7 @@
 // - 当玩家离开触发区或敌人销毁时会清理记录，避免内存泄漏
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Game; // 我们把接口放在 Game 命名空间下（例如 IInteractable, IHurtPlayer）
 using UnityEngine;
@@ -15,30 +16,43 @@ using UnityEngine.Serialization;
 
 public class Enemy : SceneItem, IHurtPlayer
 {
-    // 基础伤害值，可以在 Inspector 中调整
-    [SerializeField]
-    private int damage = 10;
-
     // 敌人生命值（玩家攻击会减少这里的血量）
-    [Header("Enemy Stats")]
-    [SerializeField, Tooltip("Enemy health")] private int maxHealth = 50;
+    [Header("Enemy Stats")] [SerializeField, Tooltip("Enemy health")]
+    private int maxHealth = 50;
+
     private int currentHealth;
 
     [Header("Damage Settings")]
     // hitCooldown：两个连续对同一 actor 造成伤害的最小间隔（秒）
-    [SerializeField, Tooltip("Seconds between consecutive damage to the same interactor")]
+    [SerializeField, Tooltip("Minimum seconds between hits to the same actor (per-actor cooldown)")]
     private float hitCooldown = 1.0f;
 
+    // 基础伤害值，可以在 Inspector 中调整
+    [SerializeField] private int damage = 10;
+
+    // 公开只读属性，便于外部查询但不允许直接修改
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
+    public int Damage => damage;
+    public float HitCooldown => hitCooldown;
+
+
     [Header("Physics (Trigger Hitbox)")]
-    [SerializeField, Tooltip("A Collider2D configured as a trigger that represents the enemy's damaging area. Assign a child collider set to 'isTrigger' = true.")]
+    [SerializeField,
+     Tooltip(
+         "A Collider2D configured as a trigger that represents the enemy's damaging area. Assign a child collider set to 'isTrigger' = true.")]
     private Collider2D damageTrigger;
 
-    [SerializeField, Tooltip("If true, the enemy will automatically call Hurt when a player enters the trigger. Otherwise you can call Hurt manually (e.g. by animation).")]
+    [SerializeField,
+     Tooltip(
+         "If true, the enemy will automatically call Hurt when a player enters the trigger. Otherwise you can call Hurt manually (e.g. by animation).")]
     private bool autoHurtOnEnter = false;
 
     [FormerlySerializedAs("StayingDamage")]
     [FormerlySerializedAs("damageWhileInside")]
-    [SerializeField, Tooltip("If true, the enemy will keep attempting to damage the player while they remain inside the trigger (subject to hitCooldown).")]
+    [SerializeField,
+     Tooltip(
+         "If true, the enemy will keep attempting to damage the player while they remain inside the trigger (subject to hitCooldown).")]
     private bool stayingDamage = true;
 
     // 用于记录每个 actor（如玩家）上次被本敌人伤害的时间（Time.time），以实现 per-actor 冷却
@@ -52,23 +66,37 @@ public class Enemy : SceneItem, IHurtPlayer
     // 简单的 processed attack id 清理策略：当集合过大时清空（这里阈值可调），避免无限增长
     private const int ProcessedAttackIdThreshold = 1024;
 
+    // 将 animator 暴露为序列化字段以便 Inspector 指定（会在 Awake 中做兜底获取）
+    [SerializeField] private Animator animator;
+    [SerializeField] protected Rigidbody2D Rb;
+
+    // 用于保障 Die 流程不会因动画异常永远挂起
+    private Coroutine dieCoroutine;
+    private float dieAnimationTimeout = 5f;
+    private float destroyFallbackDelay = 0.15f;
+
     private void Reset()
     {
         if (damageTrigger == null)
         {
             damageTrigger = GetComponentInChildren<Collider2D>();
         }
+
+        Rb = GetComponent<Rigidbody2D>();
+
         currentHealth = maxHealth;
     }
 
-    private void Awake()
+    protected virtual void Awake()
     {
         // 初始化血量
         currentHealth = maxHealth;
+        if (animator == null)
+            animator = GetComponent<Animator>();
     }
 
     // 使用 GetComponentInParent<PlayerInteract> 来统一识别玩家（避免子 Collider 导致的不同 GameObject 引用）
-    private void OnTriggerEnter2D(Collider2D other)
+    protected virtual void OnTriggerEnter2D(Collider2D other)
     {
         if (other == null) return;
 
@@ -85,13 +113,14 @@ public class Enemy : SceneItem, IHurtPlayer
             {
                 OnPlayerEnter(playerRoot);
             }
+
             return;
         }
 
         // 其他可能的交互物体可以在这里处理
     }
 
-    private void OnTriggerStay2D(Collider2D other)
+    protected virtual void OnTriggerStay2D(Collider2D other)
     {
         if (!stayingDamage) return;
         if (other == null) return;
@@ -103,7 +132,7 @@ public class Enemy : SceneItem, IHurtPlayer
         }
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    protected virtual void OnTriggerExit2D(Collider2D other)
     {
         if (other == null) return;
         var player = other.GetComponentInParent<PlayerInteract>();
@@ -114,11 +143,12 @@ public class Enemy : SceneItem, IHurtPlayer
             {
                 lastHitTime.Remove(playerRoot);
             }
+
             OnPlayerExit(playerRoot);
         }
     }
 
-    public void OnPlayerEnter(GameObject interactor)
+    protected virtual void OnPlayerEnter(GameObject interactor)
     {
         if (interactor != null && interactor.GetComponentInParent<PlayerInteract>() != null)
         {
@@ -127,9 +157,8 @@ public class Enemy : SceneItem, IHurtPlayer
         }
     }
 
-    public void OnPlayerExit(GameObject interactor)
+    protected virtual void OnPlayerExit(GameObject interactor)
     {
-        Debug.Log($"Enemy: Player exited interaction range. player={interactor?.name}");
         if (interactor != null && lastHitTime.ContainsKey(interactor))
         {
             lastHitTime.Remove(interactor);
@@ -199,7 +228,7 @@ public class Enemy : SceneItem, IHurtPlayer
     }
 
     // 敌人受伤逻辑：减少生命值，播放受击反馈，触发死亡时销毁
-    private void TakeDamage(int amount, GameObject attacker)
+    protected virtual void TakeDamage(int amount, GameObject attacker)
     {
         currentHealth -= amount;
         Debug.Log($"Enemy: Took damage {amount}. Health now {currentHealth}/{maxHealth}");
@@ -212,15 +241,131 @@ public class Enemy : SceneItem, IHurtPlayer
         }
     }
 
-    private void Die(GameObject killer)
+    protected virtual void Die(GameObject killer)
     {
         Debug.Log($"Enemy: Died. KilledBy={killer?.name}");
-        // TODO: 播放死亡动画、掉落、移除对象等
+
+        // 停止之前可能在运行的 Die 协程
+        if (dieCoroutine != null)
+        {
+            try
+            {
+                StopCoroutine(dieCoroutine);
+            }
+            catch (Exception)
+            {
+                // ignore
+            }
+
+            dieCoroutine = null;
+        }
+
+        // 兜底获取 animator
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
+
+        if (animator != null)
+        {
+            try
+            {
+                animator.SetTrigger("Die");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"Enemy: Failed to set Die trigger on Animator: {ex.Message}");
+            }
+
+            dieCoroutine = StartCoroutine(WaitForDieAnimation());
+        }
+        else
+        {
+            Debug.LogWarning("Enemy: No Animator found — using fallback destroy delay.");
+            dieCoroutine = StartCoroutine(FallbackDestroyAfterDelay(destroyFallbackDelay));
+        }
+    }
+
+    protected virtual IEnumerator WaitForDieAnimation()
+    {
+        // 保护性检查
+        if (animator == null)
+        {
+            Debug.LogWarning("Enemy: Animator is null in WaitForDieAnimation; destroying immediately.");
+            Destroy(gameObject);
+            yield break;
+        }
+
+        float startTime = Time.time;
+        float timeout = Mathf.Max(0.1f, dieAnimationTimeout);
+
+        // 等待 Animator 报告已进入 Die 状态（或下一个状态为 Die），或者超时
+        bool enteredDieState = false;
+        while (Time.time - startTime < timeout)
+        {
+            var cur = animator.GetCurrentAnimatorStateInfo(0);
+            var next = animator.GetNextAnimatorStateInfo(0);
+
+            if (cur.IsName("Die") || cur.IsTag("Die") || next.IsName("Die") || next.IsTag("Die"))
+            {
+                enteredDieState = true;
+                break;
+            }
+
+            yield return null;
+        }
+
+        if (!enteredDieState)
+        {
+            Debug.LogWarning(
+                $"Enemy: Die state not detected within {timeout}s. Falling back to destroy after short delay.");
+            yield return new WaitForSeconds(destroyFallbackDelay);
+            Destroy(gameObject);
+            yield break;
+        }
+
+        // 已进入 Die 状态，等待动画完成（normalizedTime >= 1）或超时
+        float waitStart = Time.time;
+        while (Time.time - waitStart < timeout)
+        {
+            var curState = animator.GetCurrentAnimatorStateInfo(0);
+            if ((curState.IsName("Die") || curState.IsTag("Die")) && curState.normalizedTime >= 1f)
+            {
+                Destroy(gameObject);
+                yield break;
+            }
+
+            yield return null;
+        }
+
+        // 如果动画没有在超时内完成，则强制销毁
+        Debug.LogWarning($"Enemy: Die animation did not complete within timeout ({timeout}s). Destroying gameObject.");
         Destroy(gameObject);
     }
 
-    private void OnDestroy()
+    protected virtual IEnumerator FallbackDestroyAfterDelay(float delay)
     {
+        yield return new WaitForSeconds(Mathf.Max(0f, delay));
+        Destroy(gameObject);
+    }
+
+
+    protected virtual void OnDestroy()
+    {
+        if (dieCoroutine != null)
+        {
+            try
+            {
+                StopCoroutine(dieCoroutine);
+            }
+            catch (Exception)
+            {
+                // ignore
+            }
+
+            dieCoroutine = null;
+        }
+
         lastHitTime.Clear();
         processedAttackIds.Clear();
     }

@@ -28,12 +28,14 @@ public class PlayerInteract : MonoBehaviour
     private void OnEnable()
     {
         InteractableIcon.SetActive(false);
+        currentItem = null;
         InitPlayer();
     }
 
     private void OnDisable()
     {
         InteractableIcon.SetActive(false);
+        currentItem = null;
     }
 
 
@@ -41,10 +43,15 @@ public class PlayerInteract : MonoBehaviour
     
     public void Hurt(int damage)
     {
+        // 禁用该模块时不受伤
+        if (!this.enabled)
+        {
+            return;
+        }
+        
         float now = Time.time;
         if (now < invincibleUntil)
         {
-            Debug.Log($"Player: Ignored Hurt({damage}) due to invincibility ({invincibleUntil - now:0.00}s left)");
             return;
         }
 
@@ -64,8 +71,6 @@ public class PlayerInteract : MonoBehaviour
     {
         Debug.Log("Player: Died");
         Player.instance.OnDie();
-        GameManager.Instance.LoadGame();
-        
     }
 
     public void InitPlayer()

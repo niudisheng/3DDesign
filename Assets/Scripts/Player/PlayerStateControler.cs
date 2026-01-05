@@ -39,6 +39,15 @@ public class PlayerStateController : MonoBehaviour
     // Helper properties to make long expressions concise and readable
     private float MoveInputX => playerController != null ? playerController.moveInputVector2.x : 0f;
 
+    private void OnEnable()
+    {
+        ChangeState(State.Idle);
+    }
+
+    private void OnDisable()
+    {
+        OnDisableAll();
+    }
 
     public void ChangeState(State newState)
     {
@@ -76,7 +85,6 @@ public class PlayerStateController : MonoBehaviour
 
     public void DisableState(State state)
     {
-        Debug.Log("Disable State: " + state);
         animator.SetBool(state.ToString(), false);
     }
 

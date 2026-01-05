@@ -31,10 +31,11 @@ public class Slime : Enemy
     private int moveDir = 1; 
     private bool isPaused = false;
     
-    protected Rigidbody2D Rb;
     
-    protected  void Awake()
+    
+    protected override void Awake()
     {
+        base.Awake();
         Rb = GetComponent<Rigidbody2D>();
         
         // 如果没有设置检测点，自动创建
@@ -114,5 +115,12 @@ public class Slime : Enemy
         // 翻转视觉（若需要翻转 Sprite，调整 transform）
         transform.rotation = Quaternion.Euler(0f, moveDir == 1 ? 0f : 180f, 0f);
         isPaused = false;
+        
+    }
+    [ContextMenu("Die")]
+    public void DieTest()
+    {
+        
+        Die(this.gameObject);
     }
 }
