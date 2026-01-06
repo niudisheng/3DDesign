@@ -21,7 +21,7 @@ public class PlayerStateController : MonoBehaviour
 
     private State currentState;
     private SpriteRenderer spriteRenderer;
-    private Animator animator;
+    private Animator animator=> Player.instance.animator;
     private Rigidbody2D rb; // ...existing code... (moved initialization to Start)
     private PlayerController playerController;
 
@@ -32,7 +32,7 @@ public class PlayerStateController : MonoBehaviour
 
     private void Start()
     {
-        animator = Player.instance.animator;
+        
         rb = Player.instance.rb; // cache rb here instead of at field init
         playerController = Player.instance.playerController; // cache playerController for shorter access
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
@@ -103,6 +103,8 @@ public class PlayerStateController : MonoBehaviour
         {
             animator.runtimeAnimatorController = _animators[0];
         }
+
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     #region Effect
@@ -137,14 +139,15 @@ public class PlayerStateController : MonoBehaviour
         ChangeState(State.Hurt);
 
         // 2. 闪白
-        StartCoroutine(Flash(spriteRenderer, 0.1f));
-        Player.instance.playerStateController.ChangeState(PlayerStateController.State.Hurt);
+        StartCoroutine(Flash(spriteRenderer, 0.2f));
+        Player.instance.playerStateController.ChangeState(State.Hurt);
     }
 
     IEnumerator Flash(SpriteRenderer sr, float time)
     {
+        Debug.Log("Flash Coroutine Started");
         Color original = sr.color;
-        sr.color = Color.white;
+        sr.color = new Color(255f, 255f, 255f,0.1f); ;
         yield return new WaitForSeconds(time);
         sr.color = original;
     }

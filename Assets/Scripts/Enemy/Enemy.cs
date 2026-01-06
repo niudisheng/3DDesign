@@ -191,7 +191,7 @@ public class Enemy : SceneItem, IHurtPlayer
 
         lastHitTime[key] = now;
 
-        Debug.Log($"Enemy: Hurt called on actor {key.name}. Damage={damage}");
+        // Debug.Log($"Enemy: Hurt called on actor {key.name}. Damage={damage}");
 
         if (player != null)
         {

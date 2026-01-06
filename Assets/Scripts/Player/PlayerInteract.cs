@@ -6,19 +6,20 @@ using UnityEngine;
 
 public class PlayerInteract : MonoBehaviour
 {
-
     [SerializeField] private GameObject hitbox;
 
-    [Header("Player Stats")]
-    [SerializeField] private int maxHealth = 100;
+    [Header("Player Stats")] [SerializeField]
+    private int maxHealth = 100;
+
     [SerializeField] private int currentHealth = 100;
 
-    [Header("Damage Settings")]
-    [SerializeField, Tooltip("Seconds of invincibility after taking a hit")] private float invincibleDuration = 1.0f;
+    [Header("Damage Settings")] [SerializeField, Tooltip("Seconds of invincibility after taking a hit")]
+    private float invincibleDuration = 1.0f;
 
     // attack damage
-    [SerializeField, Tooltip("Damage dealt by player's basic attack")] private int attackDamage = 10;
-    
+    [SerializeField, Tooltip("Damage dealt by player's basic attack")]
+    private int attackDamage = 10;
+
     // track invincibility end time
     private float invincibleUntil = 0f;
 
@@ -40,10 +41,7 @@ public class PlayerInteract : MonoBehaviour
 
 
     #region 受伤与死亡代码
-    
-    
-    
-    
+
     public void Hurt(int damage, Transform attacker)
     {
         // 禁用该模块时不受伤
@@ -51,19 +49,13 @@ public class PlayerInteract : MonoBehaviour
         {
             return;
         }
-        
+
         float now = Time.time;
         if (now < invincibleUntil)
         {
             return;
         }
 
-        // 计算击退方向并委托给 PlayerController 处理击退和短暂禁用控制
-        Knockback(attacker);
-        
-        Player.instance.playerStateController.HurtAnimation();
-
-        invincibleUntil = now + invincibleDuration;
 
         currentHealth -= damage;
         currentHealth = Mathf.Max(currentHealth, 0);
@@ -72,10 +64,18 @@ public class PlayerInteract : MonoBehaviour
         if (currentHealth <= 0)
         {
             Die();
+            return;
         }
+
+        // 计算击退方向并委托给 PlayerController 处理击退和短暂禁用控制
+        Knockback(attacker);
+
+        Player.instance.playerStateController.HurtAnimation();
+
+        invincibleUntil = now + invincibleDuration;
     }
-    
-    
+
+
     /// <summary>
     /// 击退玩家
     /// </summary>
@@ -102,7 +102,7 @@ public class PlayerInteract : MonoBehaviour
             }
         }
     }
-    
+
     private void ApplyKnockback(Vector2 dir, float force)
     {
         Debug.Log("Player: Applying knockback");
@@ -126,7 +126,6 @@ public class PlayerInteract : MonoBehaviour
 
     #region Attack Enemy
 
-
     /// <summary>
     /// 根据动画帧打开或关闭攻击判定
     /// </summary>
@@ -146,6 +145,7 @@ public class PlayerInteract : MonoBehaviour
                     hb.SetAttackInfo(currentAttackId, gameObject, attackDamage);
                 }
             }
+
             hitbox.SetActive(isAttack);
         }
     }
@@ -156,10 +156,11 @@ public class PlayerInteract : MonoBehaviour
     #endregion
 
     #region Interact
-    private  IInteractable currentItem;
+
+    private IInteractable currentItem;
     [SerializeField, Tooltip("可交互标识")] private GameObject InteractableIcon;
-    
-    
+
+
     public void TryInteract()
     {
         if (currentItem != null)
@@ -167,7 +168,7 @@ public class PlayerInteract : MonoBehaviour
             currentItem.Interact();
         }
     }
-    
+
     // 注意：Unity 的触发器回调函数签名要求 Collider2D，而不是 Collision2D。
     // 触发器生效的基本规则（2D 物理）:
     //  - 要触发 OnTriggerEnter2D/Stay2D/Exit2D，至少一方必须有 Rigidbody2D（kinematic 或 dynamic），
@@ -176,7 +177,7 @@ public class PlayerInteract : MonoBehaviour
     //    可拾取物品或交互体的 Collider2D 设置为 Is Trigger = true，这样玩家就能触发它们的触发器事件。
     //  - 如果都没有 Rigidbody2D，触发器/碰撞事件不会被调用。
     //  - 也要检查 Physics2D 的图层碰撞矩阵（Project Settings -> Physics2D）是否允许这两个图层发生碰撞/触发。
-    
+
     // 将 Collision2D 改为 Collider2D，确保触发器能被检测到
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -200,5 +201,6 @@ public class PlayerInteract : MonoBehaviour
             InteractableIcon.SetActive(false);
         }
     }
+
     #endregion
 }

@@ -39,6 +39,8 @@ public class Hitbox : MonoBehaviour
         GameObject enemyGo = enemy.gameObject;
         if (localProcessed.Contains(enemyGo)) return;
         localProcessed.Add(enemyGo);
+        
+        Debug.LogWarning("Hitbox triggered on enemy: " + enemyGo.name + " with attackId: " + attackId);
 
         // 调用敌人的 ReceiveHit，敌人会根据 attackId 去重
         enemy.ReceiveHit(attackId, attacker, damage);
