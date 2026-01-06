@@ -244,18 +244,7 @@ public class Player : MonoBehaviour
         }));
     }
 
-    // 动画事件回调：在 Die 动画末尾调用（比 coroutine 更可靠）
-    public void OnDieAnimationEnd()
-    {
-        // 确保在动画结束时触发场景/存档加载
-        GameManager.Instance.LoadGame();
-    }
-    
-    // 动画事件回调：在 Wake 动画末尾调用以恢复模块
-    public void OnWakeAnimationEnd()
-    {
-        UnlockModules();
-    }
+
 
     // 等待指定动画状态播放完毕（基于 state name）
     private IEnumerator WaitForAnimationEnd(string stateName, Action onComplete)
@@ -290,4 +279,6 @@ public class Player : MonoBehaviour
     
 
     #endregion
+    
+    
 }

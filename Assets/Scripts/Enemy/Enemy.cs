@@ -195,7 +195,7 @@ public class Enemy : SceneItem, IHurtPlayer
 
         if (player != null)
         {
-            player.Hurt(damage);
+            player.Hurt(damage,this.transform);
         }
         else
         {

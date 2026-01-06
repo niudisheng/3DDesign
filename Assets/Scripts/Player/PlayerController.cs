@@ -11,6 +11,10 @@ public class PlayerController : MonoBehaviour
     public float jumpSpeed = 16f;
     public Vector2 moveInputVector2;
     public float dashDuration = 0.3f;
+
+    [Header("Knockback Settings")] public float defaultKnockForce = 6f;
+    public float defaultStunDuration = 0.18f;
+
     private PlayerControls controls => Player.instance.controls;
     private PlayerInteract playerInteract => Player.instance.playerInteract;
     private Rigidbody2D rb => Player.instance.rb;
@@ -22,6 +26,8 @@ public class PlayerController : MonoBehaviour
     public bool isGrounded;
     private bool isDashing = false;
     private bool isAttacking = false;
+    // 新增：击退/眩晕标志，击退期间应该禁止玩家控制
+    private bool isStunned = false;
 
     #endregion
 
@@ -112,7 +118,8 @@ public class PlayerController : MonoBehaviour
     /// <returns></returns>
     private bool CanMove()
     {
-        return !isDashing && !isAttacking;
+        // 将 isStunned 纳入判断，眩晕/击退期间禁止移动
+        return !isDashing && !isAttacking && !isStunned;
     }
 
     private void Move()
@@ -211,4 +218,49 @@ public class PlayerController : MonoBehaviour
     }
 
     #endregion
+
+    // 新增：对外接口，应用击退并在短时间内禁用玩家控制
+    public void ApplyKnockback(Vector2 dir, float force, float stunDuration = 0.25f)
+    {
+        // 开始协程执行击退逻辑
+        StartCoroutine(KnockbackCoroutine(dir, force, stunDuration));
+    }
+
+    private IEnumerator KnockbackCoroutine(Vector2 dir, float force, float stunDuration)
+    {
+        // 如果已经在击退，则直接刷新时间并返回（或可以选择叠加）
+        // 为简单起见，这里不叠加力，只刷新计时
+        if (isStunned)
+        {
+            // 仍然施加一次瞬时力
+            rb.velocity = Vector2.zero;
+            rb.AddForce(dir.normalized * force, ForceMode2D.Impulse);
+            yield break;
+        }
+
+        // 标记为眩晕，阻止输入和移动
+        isStunned = true;
+
+        // 中断冲刺/攻击状态
+        isDashing = false;
+        isAttacking = false;
+
+        // 设置受击状态动画
+        if (playerStateController != null)
+            playerStateController.ChangeState(State.Hurt);
+
+        // 施加物理冲量
+        rb.velocity = Vector2.zero;
+        rb.AddForce(dir.normalized * force, ForceMode2D.Impulse);
+
+        // 等待眩晕结束
+        yield return new WaitForSeconds(stunDuration);
+
+        // 结束受击状态
+        isStunned = false;
+
+        // 清除受击动画状态（由状态控制器负责）
+        if (playerStateController != null)
+            playerStateController.DisableState(State.Hurt);
+    }
 }

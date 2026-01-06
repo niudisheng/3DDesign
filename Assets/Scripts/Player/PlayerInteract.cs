@@ -41,7 +41,10 @@ public class PlayerInteract : MonoBehaviour
 
     #region 受伤与死亡代码
     
-    public void Hurt(int damage)
+    
+    
+    
+    public void Hurt(int damage, Transform attacker)
     {
         // 禁用该模块时不受伤
         if (!this.enabled)
@@ -55,6 +58,11 @@ public class PlayerInteract : MonoBehaviour
             return;
         }
 
+        // 计算击退方向并委托给 PlayerController 处理击退和短暂禁用控制
+        Knockback(attacker);
+        
+        Player.instance.playerStateController.HurtAnimation();
+
         invincibleUntil = now + invincibleDuration;
 
         currentHealth -= damage;
@@ -65,6 +73,41 @@ public class PlayerInteract : MonoBehaviour
         {
             Die();
         }
+    }
+    
+    
+    /// <summary>
+    /// 击退玩家
+    /// </summary>
+    /// <param name="attacker"></param>
+    private void Knockback(Transform attacker)
+    {
+        if (attacker != null)
+        {
+            Vector2 dir = (transform.position - attacker.position).normalized;
+            // 合理的默认力和眩晕时长，可根据需要在编辑器中暴露
+            float knockForce = 6f;
+            float stunDuration = 0.18f;
+
+            // 委托给 PlayerController 来应用击退，以便统一处理移动禁用与动画
+            if (Player.instance != null && Player.instance.playerController != null)
+            {
+                Player.instance.playerController.ApplyKnockback(dir, knockForce, stunDuration);
+            }
+            else if (Player.instance != null && Player.instance.rb != null)
+            {
+                // 退回方案：如果 playerController 不可用，则直接施加力（保证不会造成编译错误）
+                Player.instance.rb.velocity = Vector2.zero;
+                Player.instance.rb.AddForce(dir.normalized * knockForce, ForceMode2D.Impulse);
+            }
+        }
+    }
+    
+    private void ApplyKnockback(Vector2 dir, float force)
+    {
+        Debug.Log("Player: Applying knockback");
+        Player.instance.rb.velocity = Vector2.zero;
+        Player.instance.rb.AddForce(dir.normalized * force, ForceMode2D.Impulse);
     }
 
     private void Die()
@@ -116,7 +159,7 @@ public class PlayerInteract : MonoBehaviour
     private  IInteractable currentItem;
     [SerializeField, Tooltip("可交互标识")] private GameObject InteractableIcon;
     
-
+    
     public void TryInteract()
     {
         if (currentItem != null)

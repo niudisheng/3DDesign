@@ -7,7 +7,6 @@ using UnityEngine;
 
 public class PlayerStateController : MonoBehaviour
 {
-
     public enum State
     {
         Idle,
@@ -16,16 +15,18 @@ public class PlayerStateController : MonoBehaviour
         Attack,
         Down,
         Jump,
+        Hurt,
     }
-    
+
 
     private State currentState;
+    private SpriteRenderer spriteRenderer;
     private Animator animator;
     private Rigidbody2D rb; // ...existing code... (moved initialization to Start)
     private PlayerController playerController;
-    
-    [Header("需要用到的Animator")]
-    [SerializeField] private AnimatorController[] _animators;
+
+    [Header("需要用到的Animator")] [SerializeField]
+    private AnimatorController[] _animators;
 
     public Action EndAttack;
 
@@ -34,6 +35,7 @@ public class PlayerStateController : MonoBehaviour
         animator = Player.instance.animator;
         rb = Player.instance.rb; // cache rb here instead of at field init
         playerController = Player.instance.playerController; // cache playerController for shorter access
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
     // Helper properties to make long expressions concise and readable
@@ -68,10 +70,13 @@ public class PlayerStateController : MonoBehaviour
     {
         foreach (State state in Enum.GetValues(typeof(State)))
         {
-            // 冲刺动画保证最高优先级，不会被其他动画打断
-            if (state == State.Dash|| state == State.Attack)
+            switch (state)
             {
-                continue;
+                case State.Dash:
+                case State.Attack:
+                case State.Hurt:
+                    // 这些状态由动画事件或其他机制控制，不在这里关闭
+                    continue;
             }
 
             animator.SetBool(state.ToString(), false);
@@ -106,7 +111,8 @@ public class PlayerStateController : MonoBehaviour
     {
         SpeedDown,
     }
-    public void PlayEffect(Effect effect,bool enable)
+
+    public void PlayEffect(Effect effect, bool enable)
     {
         switch (effect)
         {
@@ -124,7 +130,22 @@ public class PlayerStateController : MonoBehaviour
     {
         EndAttack?.Invoke();
     }
-    
-    
-    
+
+    public void HurtAnimation()
+    {
+        // 1. 动画
+        ChangeState(State.Hurt);
+
+        // 2. 闪白
+        StartCoroutine(Flash(spriteRenderer, 0.1f));
+        Player.instance.playerStateController.ChangeState(PlayerStateController.State.Hurt);
+    }
+
+    IEnumerator Flash(SpriteRenderer sr, float time)
+    {
+        Color original = sr.color;
+        sr.color = Color.white;
+        yield return new WaitForSeconds(time);
+        sr.color = original;
+    }
 }

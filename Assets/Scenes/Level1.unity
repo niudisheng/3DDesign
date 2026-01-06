@@ -458,8 +458,6 @@ MonoBehaviour:
   stayingDamage: 1
   animator: {fileID: 0}
   Rb: {fileID: 0}
-  dieAnimationTimeout: 5
-  destroyFallbackDelay: 0.15
   moveSpeed: 1.5
   groundCheckDistance: 0.6
   wallCheckDistance: 0.4
@@ -569,7 +567,7 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!95 &525086245
 Animator:
   serializedVersion: 5
@@ -80101,7 +80099,7 @@ PrefabInstance:
       objectReference: {fileID: 1739794912}
     - target: {fileID: 4794785165894857012, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: maxHealth
-      value: 20
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 4794785165894857012, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: currentHealth
