@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: water
+  m_Name: water 3
   m_Shader: {fileID: -6465566751694194690, guid: 19ba9db96023abd4cbd68ace8d5de4d5, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -89,7 +89,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _waterRT:
-        m_Texture: {fileID: 8400000, guid: bdf8169467ba5604699eef8b2c122011, type: 2}
+        m_Texture: {fileID: 8400000, guid: eb9a0cf260c8b164a87b1d1311b11b25, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -125,19 +125,19 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     - _noiseScale: 0.6
-    - _pianli: 1
-    - _speed: 2
+    - _pianli: 1.0024039
+    - _speed: 0.98
     - _strenth: 0.0024
     - _waterColorStrenth: 2
-    - _waveSpeed: 0.2
-    - _waveStrenth: 3.38
+    - _waveSpeed: 0.27
+    - _waveStrenth: 3.29
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
-    - _noiseScale_1: {r: 0.5, g: 3, b: 0, a: 0}
-    - _waterColor: {r: 0.30558026, g: 0.45977208, b: 0.5943396, a: 0}
+    - _noiseScale_1: {r: 0.5, g: 2.73, b: 0, a: 0}
+    - _waterColor: {r: 0.46196377, g: 0.4716981, b: 0.46057314, a: 0}
     - _waveColor: {r: 0.20776966, g: 0.23121071, b: 0.2735849, a: 0}
-    - _waveTiling: {r: -3.27, g: 6.68, b: 0, a: 0}
+    - _waveTiling: {r: -3, g: 10.81, b: 0, a: 0}
   m_BuildTextureStacks: []
