@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 public class UIManage : MonoBehaviour
@@ -86,15 +87,25 @@ public class UIManage : MonoBehaviour
                 BackGround.SetActive(false);
                 break;
             case UIState.Normal:
-                NormalCanvas.SetActive(true);
-                Player.SetActive(true);
-                BackGround.SetActive(true);
+                OnBeginButton();
                 break;
         }
 
         currentState = newState;
 
     }
+
+    private void OnBeginButton()
+    {
+        /*
+        NormalCanvas.SetActive(true);
+        Player.SetActive(true);
+        BackGround.SetActive(true);
+        */
+        SceceLoadManager.LoadScene(GlobalValues.SceneData.StartScene);
+        
+    }
+
     public void OnSettingsButton() => ChangeState(UIState.Settings);
     public void OnStartButton() => ChangeState(UIState.Start);
     public void OnKeysButton() => ChangeState(UIState.KeysSet);
