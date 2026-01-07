@@ -451,13 +451,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHealth: 50
-  hitCooldown: 1
+  hitCooldown: 0.5
   damage: 10
   damageTrigger: {fileID: 1966522824}
-  autoHurtOnEnter: 0
   stayingDamage: 1
-  animator: {fileID: 0}
-  Rb: {fileID: 0}
+  animator: {fileID: 525086245}
+  rb: {fileID: 525086244}
+  KnockbackUp: 1
   moveSpeed: 1.5
   groundCheckDistance: 0.6
   wallCheckDistance: 0.4
@@ -80093,9 +80093,29 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 35389376}
     m_Modifications:
+    - target: {fileID: 1696469561365132758, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
+      propertyPath: m_Size.x
+      value: 3.500001
+      objectReference: {fileID: 0}
+    - target: {fileID: 1696469561365132758, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
+      propertyPath: m_Size.y
+      value: 2.1465945
+      objectReference: {fileID: 0}
+    - target: {fileID: 1696469561365132758, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
+      propertyPath: m_Offset.x
+      value: 1.7089242
+      objectReference: {fileID: 0}
+    - target: {fileID: 1696469561365132758, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
+      propertyPath: m_Offset.y
+      value: -0.29275867
+      objectReference: {fileID: 0}
     - target: {fileID: 2944720018960467589, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3300256197303706793, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.77
       objectReference: {fileID: 0}
     - target: {fileID: 4296682097917363154, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: _cameraFollowGo
@@ -80108,6 +80128,10 @@ PrefabInstance:
     - target: {fileID: 4794785165894857012, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: currentHealth
       value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 4794785165894857012, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
+      propertyPath: invincibleDuration
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4818284192482317421, guid: e0b496e78ff7bd445bf115bf4d513777, type: 3}
       propertyPath: m_LocalPosition.x

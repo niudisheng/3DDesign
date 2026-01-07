@@ -7,7 +7,7 @@ using UnityEngine;
 /// 设计目标：
 /// - 在同一平面（水平）内朝一个方向移动（使用 Rigidbody2D.velocity）
 /// - 前方如果检测到墙体（基于 LayerMask）或没有地面时，先短暂停顿（可配置），然后反向移动
-/// - 采用合理的物理方式设置速度（不直接修改 transform），并与基类 SceneItem 的 Rb 兼容
+/// - 采用合理的物理方式设置速度（不直接修改 transform），并与基类 SceneItem 的 rb 兼容
 /// - 提供 Inspector 可调参数：moveSpeed、groundCheckDistance、wallCheckDistance、pauseOnTurn
 ///
 /// 使用方法：在敌人预制体上挂载本脚本，并确保存在 Rigidbody2D、Collider2D；将 groundLayer 和 obstacleLayer 设置为地面/障碍层。
@@ -36,7 +36,7 @@ public class Slime : Enemy
     protected override void Awake()
     {
         base.Awake();
-        Rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
         
         // 如果没有设置检测点，自动创建
         if (groundCheckPoint == null)
@@ -55,15 +55,18 @@ public class Slime : Enemy
         }
     }
 
-    private void FixedUpdate()
+
+
+    protected override void StartIntention()
     {
         // 如果暂停中，不移动
         if (isPaused)
         {
-            if (Rb != null)
+            if (rb != null)
             {
-                Rb.velocity = new Vector2(0f, Rb.velocity.y);
+                rb.velocity = new Vector2(0f, rb.velocity.y);
             }
+
             return;
         }
 
@@ -77,9 +80,9 @@ public class Slime : Enemy
         }
 
         // 正常移动（保持 y 方向速度不变）
-        if (Rb != null)
+        if (rb != null)
         {
-            Rb.velocity = new Vector2(moveDir * moveSpeed, Rb.velocity.y);
+            rb.velocity = new Vector2(moveDir * moveSpeed, rb.velocity.y);
         }
     }
 

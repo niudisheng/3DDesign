@@ -75,7 +75,6 @@ public class PlayerStateController : MonoBehaviour
                 case State.Dash:
                 case State.Attack:
                 case State.Hurt:
-                    // 这些状态由动画事件或其他机制控制，不在这里关闭
                     continue;
             }
 
@@ -139,10 +138,17 @@ public class PlayerStateController : MonoBehaviour
         ChangeState(State.Hurt);
 
         // 2. 闪白
-        StartCoroutine(Flash(spriteRenderer, 0.2f));
+        // StartCoroutine(Flash(spriteRenderer, 0.2f));
         Player.instance.playerStateController.ChangeState(State.Hurt);
     }
-
+    
+    
+    /// <summary>
+    /// 逻辑冲突，暂时弃用
+    /// </summary>
+    /// <param name="sr"></param>
+    /// <param name="time"></param>
+    /// <returns></returns>
     IEnumerator Flash(SpriteRenderer sr, float time)
     {
         Debug.Log("Flash Coroutine Started");
