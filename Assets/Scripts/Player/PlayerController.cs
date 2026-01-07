@@ -12,20 +12,19 @@ public class PlayerController : MonoBehaviour
     public Vector2 moveInputVector2;
     public float dashDuration = 0.3f;
 
-    [Header("Knockback Settings")] public float defaultKnockForce = 6f;
-    public float defaultStunDuration = 0.18f;
-
     private PlayerControls controls => Player.instance.controls;
     private PlayerInteract playerInteract => Player.instance.playerInteract;
     private Rigidbody2D rb => Player.instance.rb;
     private PlayerStateController playerStateController => Player.instance.playerStateController;
 
     #region 运动状态相关变量
-    
+
     public bool canJumping = true;
     public bool isGrounded;
     private bool isDashing = false;
+
     private bool isAttacking = false;
+
     // 新增：击退/眩晕标志，击退期间应该禁止玩家控制
     private bool isStunned = false;
 
@@ -57,7 +56,6 @@ public class PlayerController : MonoBehaviour
     {
         if (CanMove() && Player.instance.haveSword)
         {
-            Debug.Log("Player: TryAttack");
             isAttacking = true;
             playerInteract.Attack(true);
             playerStateController.ChangeState(State.Attack);
@@ -70,7 +68,6 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void EndAttack()
     {
-        Debug.Log("Player: EndAttack");
         isAttacking = false;
         playerInteract.Attack(false);
         playerStateController.DisableState(State.Attack);
@@ -96,8 +93,6 @@ public class PlayerController : MonoBehaviour
         isGrounded = false;
     }
 
-    
-
     #endregion
 
 
@@ -105,7 +100,6 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        
         if (CanMove())
         {
             Move(); // 冲刺时禁止 Move()
@@ -174,13 +168,13 @@ public class PlayerController : MonoBehaviour
         Color color = isGrounded ? Color.green : Color.red;
         Debug.DrawRay(groundCheckPoint.position, Vector2.down * groundCheckDistance, color);
     }
-    
-    
+
+
     void Update()
     {
         DownCheck();
-        
-        if (Mathf.Approximately(rb.velocity.x,0f) && isGrounded)
+
+        if (Mathf.Approximately(rb.velocity.x, 0f) && isGrounded)
         {
             playerStateController.ChangeState(State.Idle);
         }
@@ -192,13 +186,15 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
+
     private void DownCheck()
     {
-        if (rb.velocity.y < 0f && playerStateController.GetCurrentState() != State.Down&&!isGrounded)
+        if (rb.velocity.y < 0f && playerStateController.GetCurrentState() != State.Down && !isGrounded)
         {
             StartCoroutine(DownCoroutine());
         }
     }
+
     private IEnumerator DownCoroutine()
     {
         // 当上升到顶点速度变为0（或以下）时，切换到下落状态

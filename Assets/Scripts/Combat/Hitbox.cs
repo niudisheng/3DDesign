@@ -11,8 +11,10 @@ public class Hitbox : MonoBehaviour
 {
     // 当前攻击 id（每次动画触发时递增）
     private int attackId = 0;
+
     // 攻击者（通常是玩家的根 GameObject）
     private GameObject attacker;
+
     // 伤害值
     private int damage = 10;
 
@@ -30,25 +32,24 @@ public class Hitbox : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other == null) return;
-
-        // 优先查找 Enemy 组件（可能在父对象上）
-        Enemy enemy = other.GetComponentInParent<Enemy>();
-        if (enemy == null) return;
-
-        GameObject enemyGo = enemy.gameObject;
-        if (localProcessed.Contains(enemyGo)) return;
-        localProcessed.Add(enemyGo);
-        
-        Debug.LogWarning("Hitbox triggered on enemy: " + enemyGo.name + " with attackId: " + attackId);
-
-        // 调用敌人的 ReceiveHit，敌人会根据 attackId 去重
-        enemy.ReceiveHit(attackId, attacker, damage);
     }
 
     // 若 hitbox 也在停留期间造成多次触发，OnTriggerStay2D 可能也触发，我们通常只处理 Enter 即可
     private void OnTriggerStay2D(Collider2D other)
     {
-        // Optional: do nothing (we handle on enter)
+        if (other == null) return;
+
+        // 优先查找 Enemy 组件（可能在父对象上）
+        Enemy enemy = other.GetComponent<Enemy>();
+        if (enemy == null) return;
+
+        GameObject enemyGo = enemy.gameObject;
+        if (localProcessed.Contains(enemyGo)) return;
+        localProcessed.Add(enemyGo);
+
+        Debug.LogWarning("Hitbox triggered on enemy: " + enemyGo.name + " with attackId: " + attackId);
+
+        // 调用敌人的 ReceiveHit，敌人会根据 attackId 去重
+        enemy.ReceiveHit(attackId, attacker, damage);
     }
 }

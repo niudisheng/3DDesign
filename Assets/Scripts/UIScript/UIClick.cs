@@ -2,32 +2,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using TMPro;
+using UnityEngine.UI;
 
 public class UIClick : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    private TextMeshProUGUI text;
     private GameObject left;
     private GameObject right;
-    private float size;
-    void Start()
+    private Vector3 originalScale;
+    void Awake()
     {
-        text = GetComponent<TextMeshProUGUI>();
+        originalScale = transform.localScale;
         left = this.transform.Find("left").gameObject;
         right = this.transform.Find("right").gameObject;
-        size = text.fontSize;
+        ResetVisualState();
     }
     public void OnPointerEnter(PointerEventData eventData)
     {
-        text.fontSize = size*1.2f;
+        transform.localScale = originalScale*1.2f;
         left.SetActive(true);
         right.SetActive(true);
     }
     public void OnPointerExit(PointerEventData eventData) 
     {
-        text.fontSize = size;
-        left.SetActive(false);
-        right.SetActive(false);
+        ResetVisualState();
     }
     
+    void OnDisable()
+    {
+        ResetVisualState();// 当脚本所在 GameObject 被禁用时，强制重置状态
+    }
+    private void ResetVisualState()
+    {
+        transform.localScale = originalScale;
+        if (left != null) left.SetActive(false);
+        if (right != null) right.SetActive(false);
+    }
+
 }
