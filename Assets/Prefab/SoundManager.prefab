@@ -49,8 +49,6 @@ MonoBehaviour:
   musicSource: {fileID: 4420221813972435606}
   effectSource: {fileID: 6643973714784185927}
   backgroundMusic: {fileID: 0}
-  musicClips: []
-  effectClips: []
 --- !u!1 &6269037792276150161
 GameObject:
   m_ObjectHideFlags: 0

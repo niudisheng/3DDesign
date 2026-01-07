@@ -14,7 +14,7 @@ using Game; // 我们把接口放在 Game 命名空间下（例如 IInteractable
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Enemy : SceneItem, IHurtPlayer
+public abstract class Enemy : SceneItem, IHurtPlayer
 {
     // 敌人生命值（玩家攻击会减少这里的血量）
     [Header("Enemy Stats")] [SerializeField, Tooltip("Enemy health")]
@@ -63,7 +63,7 @@ public class Enemy : SceneItem, IHurtPlayer
     private const int ProcessedAttackIdThreshold = 1024;
 
     // 将 animator 暴露为序列化字段以便 Inspector 指定（会在 Awake 中做兜底获取）
-    [SerializeField] private Animator animator;
+    [SerializeField] protected Animator animator;
 
     [FormerlySerializedAs("Rb")] [SerializeField]
     protected Rigidbody2D rb;
@@ -105,10 +105,11 @@ public class Enemy : SceneItem, IHurtPlayer
         StartIntention();
     }
 
-    protected virtual void StartIntention()
-    {
-        
-    }
+    /// <summary>
+    /// 需要重写以实现敌人的移动/行为意图
+    /// </summary>
+    protected abstract void StartIntention();
+
 
     #region 与玩家的交互
 
@@ -252,7 +253,7 @@ public class Enemy : SceneItem, IHurtPlayer
     }
 
     // 新增：对外接口，应用击退并在短时间内禁用玩家控制
-    public void ApplyKnockback(Transform transform, float force, float stunDuration = 0.25f)
+    public void ApplyKnockback(Transform transform, float force, float stunDuration = 0.35f)
     {
         Vector2 dir = transform.position - this.transform.position;
         if (dir.x > 0)

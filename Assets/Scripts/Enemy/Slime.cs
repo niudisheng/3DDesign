@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -14,30 +13,54 @@ using UnityEngine;
 /// </summary>
 public class Slime : Enemy
 {
-    [Header("Movement")]
-    [SerializeField, Tooltip("巡逻速度（单位：world units/s）")] private float moveSpeed = 1.5f;
-    [SerializeField, Tooltip("检测地面的距离（从 groundCheckPoint 向下）")] private float groundCheckDistance = 0.6f;
-    [SerializeField, Tooltip("检测前方墙体的距离（从 wallCheckPoint 向前）")] private float wallCheckDistance = 0.4f;
-    [SerializeField, Tooltip("停顿时间（当遇到墙/无地面时短暂停顿再掉头）")] private float pauseOnTurn = 0.4f;
+    [Header("Movement")] [SerializeField, Tooltip("巡逻速度（单位：world units/s）")]
+    private float moveSpeed = 1.5f;
 
-    [SerializeField, Tooltip("地面检测点（通常放在脚下）")] private Transform groundCheckPoint;
-    [SerializeField, Tooltip("前方检测点（通常放在脚前）")] private Transform wallCheckPoint;
+    [SerializeField, Tooltip("检测地面的距离（从 groundCheckPoint 向下）")]
+    private float groundCheckDistance = 0.6f;
 
-    [SerializeField, Tooltip("地面层（用于检测是否还有地面）")] private LayerMask groundLayer;
-    [SerializeField, Tooltip("障碍层（用于检测墙体、不可通过的物体）")] private LayerMask obstacleLayer;
-    
-    [SerializeField]
-    [Header("角色朝向，1=右，-1=左")]
-    private int moveDir = 1; 
+    [SerializeField, Tooltip("检测前方墙体的距离（从 wallCheckPoint 向前）")]
+    private float wallCheckDistance = 0.4f;
+
+    [SerializeField, Tooltip("停顿时间（当遇到墙/无地面时短暂停顿再掉头）")]
+    private float pauseOnTurn = 0.4f;
+
+    // 新增：跳跃相关参数
+    [SerializeField, Tooltip("单次跳跃的水平速度（用于设置 x 分量）")]
+    private float hopHorizontalSpeed = 1.2f;
+
+    [SerializeField, Tooltip("单次跳跃的垂直速度（用于设置 y 分量）")]
+    private float hopVerticalVelocity = 3f;
+
+    [SerializeField, Tooltip("跳跃后的冷却时间（在冷却期间不再发起下一次跳跃）")]
+    private float hopCooldown = 1.6f;
+
+    [SerializeField, Tooltip("着地检测半径（用于 OverlapCircle）")]
+    private float groundCheckRadius = 0.12f;
+
+    [SerializeField, Tooltip("地面检测点（通常放在脚下）")]
+    private Transform groundCheckPoint;
+
+    [SerializeField, Tooltip("前方检测点（通常放在脚前）")]
+    private Transform wallCheckPoint;
+
+    [SerializeField, Tooltip("地面层（用于检测是否还有地面）")]
+    private LayerMask groundLayer;
+
+    [SerializeField, Tooltip("障碍层（用于检测墙体、不可通过的物体）")]
+    private LayerMask obstacleLayer;
+
+    [SerializeField] [Header("角色朝向，1=右，-1=左")]
+    private int moveDir = 1;
+
     private bool isPaused = false;
-    
-    
-    
+
+
     protected override void Awake()
     {
         base.Awake();
         rb = GetComponent<Rigidbody2D>();
-        
+
         // 如果没有设置检测点，自动创建
         if (groundCheckPoint == null)
         {
@@ -46,6 +69,7 @@ public class Slime : Enemy
             go.transform.localPosition = new Vector3(0f, -0.5f, 0f);
             groundCheckPoint = go.transform;
         }
+
         if (wallCheckPoint == null)
         {
             GameObject go = new GameObject("WallCheckPoint");
@@ -56,20 +80,32 @@ public class Slime : Enemy
     }
 
 
-
     protected override void StartIntention()
     {
-        // 如果暂停中，不移动
-        if (isPaused)
+        // 如果未着地，不发起新的跳跃，允许物理自然下落/移动
+        if (!IsGrounded())
         {
-            if (rb != null)
-            {
-                rb.velocity = new Vector2(0f, rb.velocity.y);
-            }
-
+            animator.SetFloat("Jump Or Down", 1);
             return;
         }
+        else
+        {
+            animator.SetFloat("Jump Or Down", 0);
+            rb.velocity = new Vector2(0f, rb.velocity.y);
+        }
 
+        if (isPaused)
+        {
+            return;
+        }
+        else
+        {
+            MoveOrTurn();
+        }
+    }
+
+    private void MoveOrTurn()
+    {
         // 检测前方是否有墙或没有地面
         bool needTurn = CheckWallAhead() || !CheckGroundAhead();
 
@@ -79,11 +115,16 @@ public class Slime : Enemy
             return;
         }
 
-        // 正常移动（保持 y 方向速度不变）
+        Debug.Log("IsGrounded(): " + IsGrounded());
+
+
+        // 发起一次跳跃：设置瞬时速度（x 和 y）然后进入冷却
         if (rb != null)
         {
-            rb.velocity = new Vector2(moveDir * moveSpeed, rb.velocity.y);
+            rb.velocity = new Vector2(moveDir * hopHorizontalSpeed, hopVerticalVelocity);
         }
+
+        StartCoroutine(HopCooldown());
     }
 
     // 检测前方墙体（使用 wallCheckPoint 向 moveDir 方向射线检测）
@@ -107,6 +148,25 @@ public class Slime : Enemy
         return hit.collider != null;
     }
 
+    // 着地检测（用于判断是否可以发起下一次跳跃）
+    private bool IsGrounded()
+    {
+        if (Mathf.Approximately(0f, rb.velocity.y))
+        {
+            Collider2D hit = Physics2D.OverlapCircle(groundCheckPoint.position, groundCheckRadius, groundLayer);
+            return hit != null;
+        }
+        return false;
+    }
+
+    // 跳跃冷却协程
+    private IEnumerator HopCooldown()
+    {
+        isPaused = true;
+        yield return new WaitForSeconds(hopCooldown);
+        isPaused = false;
+    }
+
     // 停顿并反向
     private IEnumerator TurnCoroutine()
     {
@@ -118,12 +178,28 @@ public class Slime : Enemy
         // 翻转视觉（若需要翻转 Sprite，调整 transform）
         transform.rotation = Quaternion.Euler(0f, moveDir == 1 ? 0f : 180f, 0f);
         isPaused = false;
-        
     }
+
     [ContextMenu("Die")]
     public void DieTest()
     {
-        
         Die(this.gameObject);
+    }
+
+    // 编辑器模式下画出检测辅助
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheckPoint != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(groundCheckPoint.position, groundCheckRadius);
+        }
+
+        if (wallCheckPoint != null)
+        {
+            Gizmos.color = Color.cyan;
+            Vector3 dir = Vector3.right * moveDir * wallCheckDistance;
+            Gizmos.DrawLine(wallCheckPoint.position, wallCheckPoint.position + dir);
+        }
     }
 }
