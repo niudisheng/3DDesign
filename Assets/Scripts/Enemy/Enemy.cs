@@ -242,7 +242,7 @@ public abstract class Enemy : SceneItem, IHurtPlayer
     {
         currentHealth -= amount;
         Debug.Log($"Enemy: Took damage {amount}. Health now {currentHealth}/{maxHealth}");
-        
+        animator.SetTrigger("Hurt");
         ApplyKnockback(attacker.transform, 8f, 0.25f);
 
         if (currentHealth <= 0)

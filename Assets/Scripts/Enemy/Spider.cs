@@ -30,8 +30,7 @@ public class Spider : Enemy
 
     [SerializeField, Tooltip("是否开启调试日志")] private bool debugLogs = false;
 
-    [SerializeField, Tooltip("在 Update 中强制调用 StartIntention（用于排查 AI tick 是否被触发）")]
-    private bool debugForceTick = false;
+
 
     // 状态
     private float patrolTimer;

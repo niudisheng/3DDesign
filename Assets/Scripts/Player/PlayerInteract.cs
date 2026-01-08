@@ -10,8 +10,25 @@ public class PlayerInteract : MonoBehaviour
 
     [Header("Player Stats")] [SerializeField]
     private int maxHealth = 100;
+    
+    private int _currentHealth = 100;
 
-    [SerializeField] private int currentHealth = 100;
+    public int CurrentHealth
+    {
+        get => _currentHealth;
+        set
+        {
+            if (_currentHealth == value) return;
+
+            _currentHealth = value;
+            Debug.Log("Player: CurrentHealth set to " + _currentHealth);
+
+            // 通知 UI 更新血条
+            // Use null-conditional to avoid NRE if manager isn't initialized yet; type argument can be inferred.
+            MyEventManager.Instance?.EventTrigger(EventName.PlayerHealthChange, (float)_currentHealth / maxHealth);
+        }
+    }
+
 
     [Header("Damage Settings")] [SerializeField, Tooltip("Seconds of invincibility after taking a hit")]
     private float invincibleDuration = 0.5f;
@@ -30,6 +47,7 @@ public class PlayerInteract : MonoBehaviour
     {
         InteractableIcon.SetActive(false);
         currentItem = null;
+        
         InitPlayer();
     }
 
@@ -57,11 +75,11 @@ public class PlayerInteract : MonoBehaviour
         }
 
 
-        currentHealth -= damage;
-        currentHealth = Mathf.Max(currentHealth, 0);
-        Debug.Log($"Player: HurtPlayer called with damage {damage}. Health now {currentHealth}/{maxHealth}");
+        CurrentHealth -= damage;
+        CurrentHealth = Mathf.Max(CurrentHealth, 0);
+        Debug.Log($"Player: HurtPlayer called with damage {damage}. Health now {CurrentHealth}/{maxHealth}");
 
-        if (currentHealth <= 0)
+        if (CurrentHealth <= 0)
         {
             Die();
             return;
@@ -112,7 +130,17 @@ public class PlayerInteract : MonoBehaviour
 
     public void InitPlayer()
     {
-        currentHealth = maxHealth;
+        // Set the backing field directly to avoid firing the health-change event
+        // too early (subscribers may not have registered yet).
+        _currentHealth = maxHealth;
+    }
+
+    // Broadcast initial health once all objects have run Awake/OnEnable.
+    // This ensures UI or other subscribers registered in Awake/OnEnable receive the initial value.
+    private void Start()
+    {
+        // Fire initial health update in Start so other components' OnEnable has had a chance to subscribe.
+        MyEventManager.Instance?.EventTrigger(EventName.PlayerHealthChange, (float)_currentHealth / maxHealth);
     }
 
     #endregion
