@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using Game;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
@@ -14,8 +15,7 @@ public class Player : MonoBehaviour
     // 运动相关
 
 
-    [Header("公共变量")] 
-    [HideInInspector] public Rigidbody2D rb;
+    [Header("公共变量")] [HideInInspector] public Rigidbody2D rb;
     public PlayerStateController playerStateController;
     public PlayerInteract playerInteract;
     [HideInInspector] public Animator animator;
@@ -24,7 +24,6 @@ public class Player : MonoBehaviour
     public PlayerController playerController;
 
     private Transform _spriteTransform;
-    
 
 
     [Header("Have sword")] public bool haveSword = true;
@@ -95,7 +94,14 @@ public class Player : MonoBehaviour
         if (_modulesLocked) return;
         _modulesLocked = true;
 
-        try { controls?.Player.Disable(); } catch (Exception ex) { Debug.LogWarning($"Failed to disable controls: {ex}"); }
+        try
+        {
+            controls?.Player.Disable();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"Failed to disable controls: {ex}");
+        }
 
         if (playerController != null)
             playerController.enabled = false;
@@ -120,7 +126,14 @@ public class Player : MonoBehaviour
         if (!_modulesLocked) return;
         _modulesLocked = false;
 
-        try { controls?.Player.Enable(); } catch (Exception ex) { Debug.LogWarning($"Failed to enable controls: {ex}"); }
+        try
+        {
+            controls?.Player.Enable();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"Failed to enable controls: {ex}");
+        }
 
         if (playerController != null)
             playerController.enabled = true;
@@ -152,7 +165,7 @@ public class Player : MonoBehaviour
             CameraManager.instance.LerpYDamping(false);
         }
     }
-    
+
     public void ChangeDir(float moveX)
     {
         // 翻转朝向（只有移动时才改变）
@@ -185,12 +198,19 @@ public class Player : MonoBehaviour
 
     public void GetSword()
     {
-        SetSword(true);
+        animator.SetTrigger("GetSword");
+        LockModules();
+        WaitForAnimation("GetSword", () =>
+        {
+            SetSword(true);
+            UnlockModules();
+        });
     }
 
     #endregion
 
     #region 死亡与重生
+
     [ContextMenu("Test Die")]
     public void OnDie()
     {
@@ -205,13 +225,13 @@ public class Player : MonoBehaviour
 
         // 最佳做法：在动画剪辑末端添加一个 Animation Event 调用 `OnDieAnimationEnd`。
         // 如果你没有添加事件，下面的 coroutine 会作为回退路径，在状态结束后执行。
-        StartCoroutine(WaitForAnimationEnd("Die", () =>
+        WaitForAnimation("Die", () =>
         {
             // 如果动画事件没有调用，这里会作为回退执行
             GameManager.Instance.LoadGame();
-        }));
+        });
     }
-    
+
     public void OnRespawn(SaveData saveData)
     {
         Debug.Log("Player: OnRespawn called");
@@ -231,23 +251,29 @@ public class Player : MonoBehaviour
         if (rb != null) rb.velocity = Vector2.zero;
 
 
-
         // 播放重生动画
         animator.SetTrigger(_wakeTriggerHash);
 
         // 推荐在 Wake 动画末尾添加 Animation Event 调用 `OnWakeAnimationEnd`。
         // 同时保留 coroutine 回退机制。
+        WaitForAnimation("Wake", UnlockModules);
+        /*
         StartCoroutine(WaitForAnimationEnd("Wake", () =>
         {
             // 动画结束后恢复模块
             UnlockModules();
         }));
+        */
+    }
+
+    public void WaitForAnimation(string stateName, UnityAction onComplete)
+    {
+        StartCoroutine(WaitForAnimationEnd(stateName, onComplete));
     }
 
 
-
     // 等待指定动画状态播放完毕（基于 state name）
-    private IEnumerator WaitForAnimationEnd(string stateName, Action onComplete)
+    private IEnumerator WaitForAnimationEnd(string stateName, UnityAction onComplete)
     {
         // 等待动画状态进入
         float enterTimeout = 2f;
@@ -276,9 +302,6 @@ public class Player : MonoBehaviour
 
         onComplete?.Invoke();
     }
-    
 
     #endregion
-    
-    
 }
