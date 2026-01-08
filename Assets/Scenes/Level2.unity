@@ -139486,6 +139486,10 @@ PrefabInstance:
       propertyPath: orthographic size
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 8517588246389149171, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
+      propertyPath: m_UpdateMethod
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 8727500506778351040, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_Name
       value: Camera
