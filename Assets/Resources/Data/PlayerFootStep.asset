@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 964978bd2b452ac4a948adaa41eb8dec, type: 3}
+  m_Name: PlayerFootStep
+  m_EditorClassIdentifier: 
+  AudioSource: PlayerMove
+  volume: 0.729
+  clips:
+  - {fileID: 8300000, guid: aabf18a47c3b35745b62445480653574, type: 3}
+  - {fileID: 8300000, guid: 62db6920ef27c294e909419572b4b257, type: 3}
+  - {fileID: 8300000, guid: 8e6e8139e32726e488ac4a00f3224f85, type: 3}
+  - {fileID: 8300000, guid: 84d2e88c99997304b92b4cff45c777f7, type: 3}
+  pitch:
+    max: 1
+    min: 0.3
+  loop: 0
+  soundTag: 1

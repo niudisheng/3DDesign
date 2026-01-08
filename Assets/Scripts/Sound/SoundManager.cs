@@ -204,4 +204,8 @@ public class SoundManager : MonoBehaviour
         soundSetting.EffectVolume = Mathf.Clamp01(volume);
         effectSource.volume = soundSetting.EffectVolume;
     }
+    public bool IsHasSoundSource(string sourceName)
+    {
+        return audioSources.ContainsKey(sourceName);
+    }
 }

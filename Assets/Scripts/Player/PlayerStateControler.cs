@@ -60,6 +60,24 @@ public class PlayerStateController : MonoBehaviour
         PlayAnimationByState(newState);
     }
 
+    private void Update()
+    {
+        // PlayStateSound(currentState);
+    }
+
+    private void PlayStateSound(State state)
+    {
+        switch (state)
+        {
+            case State.Walk:
+                PlayerSound.Instance.PlayWalkSound();
+    
+                break;
+            default:
+                break;
+        }
+    }
+
     private void PlayAnimationByState(State state)
     {
         OnDisableAll();

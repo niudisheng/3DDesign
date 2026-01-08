@@ -22,7 +22,7 @@ public class Player : MonoBehaviour
     [HideInInspector] public PlayerControls controls;
     [HideInInspector] public int faceDir = 1; // 1 向右，-1 向左
     public PlayerController playerController;
-
+    public PlayerSound playerSound;
     private Transform _spriteTransform;
 
 

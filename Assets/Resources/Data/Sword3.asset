@@ -10,11 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa368cac0a1b84044a6901220e32c5f6, type: 3}
-  m_Name: New Sound
+  m_Name: Sword3
   m_EditorClassIdentifier: 
-  AudioSource: 
+  AudioSource: Sword
   volume: 1
-  clip: {fileID: 8300000, guid: 9d7c568aad17d0c42bee05576b37c0d0, type: 3}
+  clip: {fileID: 8300000, guid: 888d374273c4d2744aa3b4453cafdae4, type: 3}
   pitch:
     max: 1
     min: 1
