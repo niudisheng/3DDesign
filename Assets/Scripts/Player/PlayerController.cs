@@ -40,6 +40,9 @@ public class PlayerController : MonoBehaviour
         controls.Player.Dash.performed += ctx => TryDash();
         controls.Player.Interact.performed += ctx => playerInteract.TryInteract();
         controls.Player.Attack.performed += ctx => TryAttack();
+        
+        //测试用拔剑
+        controls.Player.GetSword.performed += ctx => GameManager.Instance.ChangePlayer();
         SetEndAttack();
     }
 
@@ -174,10 +177,11 @@ public class PlayerController : MonoBehaviour
     {
         DownCheck();
 
-        if (Mathf.Approximately(rb.velocity.x, 0f) && isGrounded)
+        if (Mathf.Approximately(rb.velocity.x, 0f) && isGrounded && moveInputVector2.x == 0f)
         {
             playerStateController.ChangeState(State.Idle);
         }
+
         else
         {
             if (isGrounded)
@@ -214,6 +218,8 @@ public class PlayerController : MonoBehaviour
     }
 
     #endregion
+
+    #region 击退代码
 
     // 新增：对外接口，应用击退并在短时间内禁用玩家控制
     public void ApplyKnockback(Vector2 dir, float force, float stunDuration = 0.25f)
@@ -259,4 +265,6 @@ public class PlayerController : MonoBehaviour
         if (playerStateController != null)
             playerStateController.DisableState(State.Hurt);
     }
+
+    #endregion
 }
