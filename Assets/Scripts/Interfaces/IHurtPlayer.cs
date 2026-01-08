@@ -8,6 +8,6 @@ namespace Game
     /// </summary>
     public interface IHurtPlayer
     {
-        void Hurt(GameObject actor);
+        void HurtPlayer(GameObject actor);
     }
 }

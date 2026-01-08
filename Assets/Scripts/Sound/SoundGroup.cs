@@ -10,6 +10,7 @@ public class SoundGroup : ScriptableObject
     public AudioClip[] clips;
     public PitchSettings pitch;
     public bool loop=false;
+    public Sound.SoundTag soundTag=Sound.SoundTag.None;
     public float getRandomPitch()
     {
         return Random.Range(pitch.min, pitch.max);

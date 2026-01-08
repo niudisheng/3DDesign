@@ -16,9 +16,9 @@ public class Sound : ScriptableObject
     public enum SoundTag
     {
         None = 0,
-        SFX  = 1 << 0,
-        BGM  = 1 << 1,
-        UI   = 1 << 2,
+        SFX  = 1,
+        BGM  = 2,
+        UI   = 3,
     }
 
     // Use normal enum assignment syntax; default to SFX

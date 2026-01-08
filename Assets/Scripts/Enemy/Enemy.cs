@@ -163,7 +163,7 @@ public abstract class Enemy : SceneItem, IHurtPlayer
             var player = other.GetComponent<PlayerInteract>();
             if (player != null)
             {
-                Hurt(other);
+                HurtPlayer(other);
             }
         }
     }
@@ -171,7 +171,7 @@ public abstract class Enemy : SceneItem, IHurtPlayer
 
     // IHurtPlayer 接口实现：对指定 actor 造成伤害（遵循 per-actor 冷却）
     // 这用于敌人的环境伤害（如持续区域/接触伤害），仍然按 hitCooldown 生效
-    public void Hurt(GameObject actor)
+    public void HurtPlayer(GameObject actor)
     {
         if (actor == null) return;
 
@@ -190,7 +190,7 @@ public abstract class Enemy : SceneItem, IHurtPlayer
 
         lastHitTime[key] = now;
 
-        // Debug.Log($"Enemy: Hurt called on actor {key.name}. Damage={damage}");
+        // Debug.Log($"Enemy: HurtPlayer called on actor {key.name}. Damage={damage}");
 
         if (player != null)
         {
@@ -230,7 +230,7 @@ public abstract class Enemy : SceneItem, IHurtPlayer
         // 处理受击：将伤害应用到本敌人（而不是反向伤害玩家）
         Debug.Log($"Enemy: ReceiveHit from {attacker?.name} attackId={attackId} damage={damageAmount}");
 
-        TakeDamage(damageAmount, attacker);
+        ReceiveDamage(damageAmount, attacker);
     }
 
     /// <summary>
@@ -238,12 +238,11 @@ public abstract class Enemy : SceneItem, IHurtPlayer
     /// </summary>
     /// <param name="amount"></param>
     /// <param name="attacker"></param>
-    protected virtual void TakeDamage(int amount, GameObject attacker)
+    protected virtual void ReceiveDamage(int amount, GameObject attacker)
     {
         currentHealth -= amount;
         Debug.Log($"Enemy: Took damage {amount}. Health now {currentHealth}/{maxHealth}");
-
-        animator.SetTrigger("Hurt");
+        
         ApplyKnockback(attacker.transform, 8f, 0.25f);
 
         if (currentHealth <= 0)

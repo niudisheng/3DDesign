@@ -55,7 +55,7 @@ public class SoundManager : MonoBehaviour
     private void SetBackgroundMusic()
     {
         MyEventManager.Instance.AddEventListener(EventName.GameStart,
-            () => PlaySound(backgroundMusic, loop: true, sourceName: "BackgroundMusic"));
+            () => PlaySound(backgroundMusic,Sound.SoundTag.BGM, loop: true, sourceName: "BackgroundMusic"));
     }
 
     // 加载音频剪辑（一次性）
@@ -97,7 +97,7 @@ public class SoundManager : MonoBehaviour
     }
 
     // 播放音效,并指定音频源
-    public void PlaySound(AudioClip clip, bool loop = false, float pitch = 1f, float volume = 1f,
+    public void PlaySound(AudioClip clip,Sound.SoundTag tag, bool loop = false, float pitch = 1f, float volume = 1f,
         string sourceName = "")
     {
         AudioSource source = GetAudioSource(sourceName);
@@ -105,12 +105,26 @@ public class SoundManager : MonoBehaviour
         source.loop = loop;
         source.pitch = pitch;
         source.volume = volume;
+        switch (tag)
+        {
+            case (Sound.SoundTag.None):
+                break;
+            case (Sound.SoundTag.SFX):
+                source.volume *= soundSetting.EffectVolume;
+                break;
+            case (Sound.SoundTag.BGM):
+                source.volume *= soundSetting.MusicVolume;
+                break;
+            case (Sound.SoundTag.UI):
+                break;
+        }
+        
         source.Play();
     }
 
     public void PlaySound(Sound sound)
     {
-        PlaySound(sound.clip, sound.loop, sound.getRandomPitch(), sound.volume, sourceName: sound.AudioSource);
+        PlaySound(sound.clip,sound.soundTag, sound.loop, sound.getRandomPitch(), sound.volume, sourceName: sound.AudioSource);
     }
 
     public void PlaySoundGroup(SoundGroup soundGroup)
@@ -118,7 +132,7 @@ public class SoundManager : MonoBehaviour
         int index = Random.Range(0, soundGroup.clips.Length);
         AudioClip clip = soundGroup.clips[index];
         Debug.Log("Play sound group: " + soundGroup.name + " index: " + index + " clip: " + clip.name);
-        PlaySound(clip, soundGroup.loop, soundGroup.getRandomPitch(), soundGroup.volume,
+        PlaySound(clip,soundGroup.soundTag,soundGroup.loop, soundGroup.getRandomPitch(), soundGroup.volume,
             sourceName: soundGroup.AudioSource);
     }
 
