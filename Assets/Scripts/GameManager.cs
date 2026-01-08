@@ -34,7 +34,20 @@ public class GameManager : MonoBehaviour
     }
     public void LoadGame()
     {
+        // Start a coroutine that will perform the BW transitions sequentially and wait for them to finish
+        StartCoroutine(LoadGameRoutine());
+    }
+
+    private IEnumerator LoadGameRoutine()
+    {
+        // fade to 0.2 over 1 second
+        yield return StartCoroutine(CameraManager.instance.ChangeBlackWhiteEffectAsync(0.2f, 1f));
         player.OnRespawn(saveData);
+        // fade back to 0 over 1 second
+        yield return StartCoroutine(CameraManager.instance.ChangeBlackWhiteEffectAsync(0f, 1f));
+
+        // After the transitions complete, restore player state
+        
     }
 
 

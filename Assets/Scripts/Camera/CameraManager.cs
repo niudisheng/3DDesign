@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 public class CameraManager : MonoBehaviour
 {
@@ -19,9 +21,14 @@ public class CameraManager : MonoBehaviour
 
     private Coroutine _lerpYPanCoroutine;
     private Coroutine _PanCameraCoroutine;
+    private Coroutine _bwCoroutine;
     
     private CinemachineVirtualCamera _currentCamera;
     private CinemachineFramingTransposer _framingTransposer;
+
+    // Post-processing volume and vignette (optional)
+    private Volume _postProcessVolume;
+    private Vignette _vignetteSetting;
 
     private float _normYPanAmount;
 
@@ -49,6 +56,13 @@ public class CameraManager : MonoBehaviour
         _normYPanAmount = _framingTransposer.m_YDamping;
         
        _startingTrackedObjectOffset = _framingTransposer.m_TrackedObjectOffset;
+
+        // Try to find a post-process Volume in the scene and cache the Vignette setting if present
+        _postProcessVolume = FindObjectOfType<Volume>();
+        if (_postProcessVolume != null && _postProcessVolume.profile != null)
+        {
+            _postProcessVolume.profile.TryGet<Vignette>(out _vignetteSetting);
+        }
         
         
     }
@@ -193,5 +207,88 @@ public class CameraManager : MonoBehaviour
     }
     #endregion
     
-    
+    [ContextMenu("Test Change BlackWhite Effect")]
+    public void Change()
+    {
+        ChangeBlackWhiteEffect(1f, 1f);
+    }
+
+
+    /// <summary>
+    /// 转场黑幕效果变化
+    /// </summary>
+    /// <param name="targetValue"></param>
+    /// <param name="changeTime"></param>
+    public void ChangeBlackWhiteEffect(float targetValue, float changeTime)
+    {
+        if (_bwCoroutine != null)
+        {
+            StopCoroutine(_bwCoroutine);
+            _bwCoroutine = null;
+        }
+        _bwCoroutine = StartCoroutine(ChangeBWEffectCoroutine(targetValue, changeTime));
+    }
+
+    /// <summary>
+    /// Indicates whether a BW change coroutine is currently running.
+    /// </summary>
+    public bool IsChangingBWEffect => _bwCoroutine != null;
+
+    /// <summary>
+    /// Starts a BW change and yields until it completes. Useful for other scripts to wait on the effect.
+    /// </summary>
+    public IEnumerator ChangeBlackWhiteEffectAsync(float targetValue, float changeTime)
+    {
+        // Start the existing effect which sets _bwCoroutine.
+        ChangeBlackWhiteEffect(targetValue, changeTime);
+
+        // Wait until the internal coroutine completes.
+        while (_bwCoroutine != null)
+        {
+            yield return null;
+        }
+    }
+
+    private IEnumerator ChangeBWEffectCoroutine(float targetValue, float changeTime)
+    {
+        // We rely on a Volume with a Vignette setting (URP/Volumes). If we don't have one, try to find it now.
+        if (_vignetteSetting == null)
+        {
+            if (_postProcessVolume == null)
+            {
+                _postProcessVolume = FindObjectOfType<Volume>();
+            }
+
+            if (_postProcessVolume == null || _postProcessVolume.profile == null ||
+                !_postProcessVolume.profile.TryGet<Vignette>(out _vignetteSetting))
+            {
+                // No vignette to animate; exit gracefully
+                _bwCoroutine = null;
+                yield break;
+            }
+        }
+
+        // Read start value from the vignette setting
+        float startValue = _vignetteSetting.intensity.value;
+
+        // Clamp changeTime to avoid division by zero
+        if (changeTime <= 0f)
+        {
+            _vignetteSetting.intensity.value = targetValue;
+            _bwCoroutine = null;
+            yield break;
+        }
+
+        float elapsed = 0f;
+        while (elapsed < changeTime)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / changeTime);
+            _vignetteSetting.intensity.value = Mathf.Lerp(startValue, targetValue, t);
+            yield return null;
+        }
+
+        _vignetteSetting.intensity.value = targetValue;
+        _bwCoroutine = null;
+    }
 }

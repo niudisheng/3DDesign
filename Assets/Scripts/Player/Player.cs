@@ -268,11 +268,8 @@ public class Player : MonoBehaviour
 
     public void WaitForAnimation(string stateName, UnityAction onComplete)
     {
-        StartCoroutine(GameManager.Instance.WaitForAnimationEnd(stateName, onComplete,animator));
+        StartCoroutine(GameManager.Instance.WaitForAnimationEnd(stateName, onComplete, animator));
     }
-
-
-    
 
     #endregion
 }
