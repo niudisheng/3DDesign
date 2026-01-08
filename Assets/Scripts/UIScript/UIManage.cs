@@ -6,13 +6,11 @@ using UnityEngine.UIElements;
 
 public class UIManage : MonoBehaviour
 {
+    public static UIManage Instance { get; private set; }
     private PlayerControls controls;
     private enum UIState { Start, Settings, OriginalSettings, KeysSet, OriginalKeys, Normal, Bag }
-    [Header("角色")] 
-    [SerializeField] private GameObject Player;
-
-    [Header("场景")]
-    [SerializeField] private GameObject BackGround;
+    private GameObject Player;
+    private GameObject BackGround;
 
     [Header("页面")]
     [SerializeField] private GameObject StartCanvas;
@@ -22,18 +20,30 @@ public class UIManage : MonoBehaviour
     [SerializeField] private GameObject KeysCanvas;
     [SerializeField] private GameObject OriginalKeysCanvas;
     private UIState currentState;
+    private bool isInitialized = false;
 
     void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            // 如果已经有一个实例存在，销毁这个新的
+            Destroy(gameObject);
+            return; 
+        }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        if (!isInitialized)
+        {
+            Initialize();
+            isInitialized = true;
+        }
+    }
+    void Initialize()//初始化
+    {
         controls = new PlayerControls();
         controls.Player.UISettings.performed += ctx => OnSettingsButton();
-        ChangeState(UIState.Start); 
+        ChangeState(UIState.Start);
     }
-    void OnEnable()
-    {
-        controls.Player.Enable();  
-    }
-
     void OnDisable()
     {
         controls.Player.Disable();  
@@ -43,11 +53,11 @@ public class UIManage : MonoBehaviour
     {
         if (currentState == UIState.Settings || currentState == UIState.KeysSet)
         {
-            // 退出Settings和KeysSet状态时恢复时间
             Time.timeScale = 1f;
-            Player.SetActive(false);    
-            BackGround.SetActive(false); 
+            if (Player != null) Player.SetActive(false);
+            if (BackGround != null) BackGround.SetActive(false);
         }
+
         // 隐藏所有Canvas
         StartCanvas.SetActive(false);
         SetCanvas.SetActive(false);
@@ -56,43 +66,51 @@ public class UIManage : MonoBehaviour
         OriginalSetCanvas.SetActive(false);
         OriginalKeysCanvas.SetActive(false);
 
-
         switch (newState)
         {
-            case UIState.Start: 
+            case UIState.Start:
                 StartCanvas.SetActive(true);
-                Player.SetActive(false);
-                BackGround.SetActive(false);
+                if (Player != null) Player.SetActive(false);
+                if (BackGround != null) BackGround.SetActive(false);
+                DisableGameplayInput();
+                Debug.Log("禁用输入");
                 break;
-            case UIState.Settings: 
+            case UIState.Settings:
                 SetCanvas.SetActive(true);
-                Player.SetActive(true);
-                BackGround.SetActive(true);
-                Time.timeScale = 0f; //暂停时间
+                if (Player != null) Player.SetActive(true);
+                if (BackGround != null) BackGround.SetActive(true);
+                Time.timeScale = 0f;
+                DisableGameplayInput();
                 break;
             case UIState.KeysSet:
                 KeysCanvas.SetActive(true);
-                Player.SetActive(true);
-                BackGround.SetActive(true);
-                Time.timeScale = 0f; 
+                if (Player != null) Player.SetActive(true);
+                if (BackGround != null) BackGround.SetActive(true);
+                Time.timeScale = 0f;
+                DisableGameplayInput();
                 break;
-            case UIState.OriginalSettings:  // 开始界面的Settings
+            case UIState.OriginalSettings:
                 OriginalSetCanvas.SetActive(true);
-                Player.SetActive(false);
-                BackGround.SetActive(false);
+                if (Player != null) Player.SetActive(false);
+                if (BackGround != null) BackGround.SetActive(false);
+                DisableGameplayInput();
                 break;
-            case UIState.OriginalKeys:  
+            case UIState.OriginalKeys:
                 OriginalKeysCanvas.SetActive(true);
-                Player.SetActive(false);
-                BackGround.SetActive(false);
+                if (Player != null) Player.SetActive(false);
+                if (BackGround != null) BackGround.SetActive(false);
+                DisableGameplayInput();
                 break;
             case UIState.Normal:
+                NormalCanvas.SetActive(true);
+                if (Player != null) Player.SetActive(true);
+                if (BackGround != null) BackGround.SetActive(true);
+                EnableGameplayInput();
                 OnBeginButton();
                 break;
         }
 
         currentState = newState;
-
     }
 
     private void OnBeginButton()
@@ -112,4 +130,30 @@ public class UIManage : MonoBehaviour
     public void OnNormalButton() => ChangeState(UIState.Normal);
     public void OnOriginalSettings() => ChangeState(UIState.OriginalSettings); 
     public void OnOriginalKeysButton() => ChangeState(UIState.OriginalKeys);
+    
+    private void EnableGameplayInput()// 启用游戏输入
+    {
+        controls.Player.Enable();
+    }
+    private void DisableGameplayInput() // 禁用游戏输入
+    {
+        controls.Player.Disable();
+    }
+    public void SetCurrentSceneObjects(GameObject scenePlayer, GameObject sceneBackground)
+    {
+        if (scenePlayer != null)
+        {
+            Player = scenePlayer;
+        }
+        if (sceneBackground != null)
+        {
+            BackGround = sceneBackground;
+        }
+    }
+    // 清除场景对象
+    public void ClearSceneObjects()
+    {
+        Player = null;
+        BackGround = null;
+    }
 }
