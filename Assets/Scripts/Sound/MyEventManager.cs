@@ -4,7 +4,7 @@ using UnityEngine.Events;
 public enum EventName
 {
     GameStart,
-    LoadStartScene,
+    PlayerHealthChange,
 }
 
 public interface IEventInfo
@@ -141,6 +141,25 @@ public class MyEventManager
             (_eventDic[eventName] as EventInfo<T>).Actions?.Invoke(info);
         }
     }
+    #endregion
+
+    #region 泛型版本EventName枚举
+
+    public void AddEventListener<T>(EventName eventName, UnityAction<T> action)
+    {
+        AddEventListener<T>(eventName.ToString(), action);
+    }
+
+    public void RemoveEventListener<T>(EventName eventName, UnityAction<T> action)
+    {
+        RemoveEventListener<T>(eventName.ToString(), action);
+    }
+
+    public void EventTrigger<T>(EventName eventName, T info)
+    {
+        EventTrigger<T>(eventName.ToString(), info);
+    }
+
     #endregion
 
     #region 多个参数试做,用装箱拆箱来实现
