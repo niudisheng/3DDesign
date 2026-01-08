@@ -98,7 +98,7 @@ public class SoundManager : MonoBehaviour
 
     // 播放音效,并指定音频源
     public void PlaySound(AudioClip clip,Sound.SoundTag tag, bool loop = false, float pitch = 1f, float volume = 1f,
-        string sourceName = "")
+        string sourceName = "",Sound.DistanceSoundSettings settings = null)
     {
         AudioSource source = GetAudioSource(sourceName);
         source.clip = clip;
@@ -117,6 +117,14 @@ public class SoundManager : MonoBehaviour
                 break;
             case (Sound.SoundTag.UI):
                 break;
+        }
+
+        if (settings != null && settings.enableDistanceSound)
+        {
+            settings.maxDistance = Mathf.Max(1f, settings.maxDistance);
+            source.spatialBlend = 1f; // 3D声音
+            source.rolloffMode = AudioRolloffMode.Logarithmic;
+            // source.rolloffMode = AudioRolloffMode.Linear;
         }
         
         source.Play();
