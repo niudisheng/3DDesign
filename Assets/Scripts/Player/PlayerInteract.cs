@@ -14,7 +14,7 @@ public class PlayerInteract : MonoBehaviour
     [SerializeField] private int currentHealth = 100;
 
     [Header("Damage Settings")] [SerializeField, Tooltip("Seconds of invincibility after taking a hit")]
-    private float invincibleDuration = 1.0f;
+    private float invincibleDuration = 0.5f;
 
     // attack damage
     [SerializeField, Tooltip("Damage dealt by player's basic attack")]
@@ -102,13 +102,7 @@ public class PlayerInteract : MonoBehaviour
             }
         }
     }
-
-    private void ApplyKnockback(Vector2 dir, float force)
-    {
-        Debug.Log("Player: Applying knockback");
-        Player.instance.rb.velocity = Vector2.zero;
-        Player.instance.rb.AddForce(dir.normalized * force, ForceMode2D.Impulse);
-    }
+    
 
     private void Die()
     {

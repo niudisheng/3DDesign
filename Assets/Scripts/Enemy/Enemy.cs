@@ -14,7 +14,7 @@ using Game; // 我们把接口放在 Game 命名空间下（例如 IInteractable
 using UnityEngine;
 using UnityEngine.Serialization;
 
-public class Enemy : SceneItem, IHurtPlayer
+public abstract class Enemy : SceneItem, IHurtPlayer
 {
     // 敌人生命值（玩家攻击会减少这里的血量）
     [Header("Enemy Stats")] [SerializeField, Tooltip("Enemy health")]
@@ -25,7 +25,7 @@ public class Enemy : SceneItem, IHurtPlayer
     [Header("Damage Settings")]
     // hitCooldown：两个连续对同一 actor 造成伤害的最小间隔（秒）
     [SerializeField, Tooltip("Minimum seconds between hits to the same actor (per-actor cooldown)")]
-    private float hitCooldown = 1.0f;
+    private float hitCooldown = 0.5f;
 
     // 基础伤害值，可以在 Inspector 中调整
     [SerializeField] private int damage = 10;
@@ -43,10 +43,6 @@ public class Enemy : SceneItem, IHurtPlayer
          "A Collider2D configured as a trigger that represents the enemy's damaging area. Assign a child collider set to 'isTrigger' = true.")]
     private Collider2D damageTrigger;
 
-    [SerializeField,
-     Tooltip(
-         "If true, the enemy will automatically call Hurt when a player enters the trigger. Otherwise you can call Hurt manually (e.g. by animation).")]
-    private bool autoHurtOnEnter = false;
 
     [FormerlySerializedAs("StayingDamage")]
     [FormerlySerializedAs("damageWhileInside")]
@@ -67,13 +63,17 @@ public class Enemy : SceneItem, IHurtPlayer
     private const int ProcessedAttackIdThreshold = 1024;
 
     // 将 animator 暴露为序列化字段以便 Inspector 指定（会在 Awake 中做兜底获取）
-    [SerializeField] private Animator animator;
-    [SerializeField] protected Rigidbody2D Rb;
+    [SerializeField] protected Animator animator;
+
+    [FormerlySerializedAs("Rb")] [SerializeField]
+    protected Rigidbody2D rb;
 
     // 用于保障 Die 流程不会因动画异常永远挂起
     private Coroutine dieCoroutine;
     private float dieAnimationTimeout = 5f;
     private float destroyFallbackDelay = 0.15f;
+
+    protected bool MotionLocked = false;
 
     private void Reset()
     {
@@ -82,7 +82,7 @@ public class Enemy : SceneItem, IHurtPlayer
             damageTrigger = GetComponentInChildren<Collider2D>();
         }
 
-        Rb = GetComponent<Rigidbody2D>();
+        rb = GetComponent<Rigidbody2D>();
 
         currentHealth = maxHealth;
     }
@@ -95,84 +95,83 @@ public class Enemy : SceneItem, IHurtPlayer
             animator = GetComponent<Animator>();
     }
 
+    protected virtual void FixedUpdate()
+    {
+        if (MotionLocked)
+        {
+            return;
+        }
+
+        StartIntention();
+    }
+
+    /// <summary>
+    /// 需要重写以实现敌人的移动/行为意图
+    /// </summary>
+    protected abstract void StartIntention();
+
+
+    #region 与玩家的交互
+
     // 使用 GetComponentInParent<PlayerInteract> 来统一识别玩家（避免子 Collider 导致的不同 GameObject 引用）
     protected virtual void OnTriggerEnter2D(Collider2D other)
     {
         if (other == null) return;
-
-        // 优先通过 PlayerInteract 组件来识别玩家
-        var player = other.GetComponentInParent<PlayerInteract>();
-        if (player != null)
-        {
-            GameObject playerRoot = player.gameObject;
-            if (autoHurtOnEnter)
-            {
-                Hurt(playerRoot);
-            }
-            else
-            {
-                OnPlayerEnter(playerRoot);
-            }
-
-            return;
-        }
-
-        // 其他可能的交互物体可以在这里处理
+        OnPlayerEnter(other.gameObject);
     }
 
     protected virtual void OnTriggerStay2D(Collider2D other)
     {
-        if (!stayingDamage) return;
         if (other == null) return;
 
-        var player = other.GetComponentInParent<PlayerInteract>();
-        if (player != null)
-        {
-            Hurt(player.gameObject);
-        }
+        OnPlayerStay(other.gameObject);
     }
 
     protected virtual void OnTriggerExit2D(Collider2D other)
     {
         if (other == null) return;
-        var player = other.GetComponentInParent<PlayerInteract>();
-        if (player != null)
-        {
-            GameObject playerRoot = player.gameObject;
-            if (lastHitTime.ContainsKey(playerRoot))
-            {
-                lastHitTime.Remove(playerRoot);
-            }
-
-            OnPlayerExit(playerRoot);
-        }
+        OnPlayerExit(other.gameObject);
     }
 
     protected virtual void OnPlayerEnter(GameObject interactor)
     {
-        if (interactor != null && interactor.GetComponentInParent<PlayerInteract>() != null)
+    }
+
+    protected virtual void OnPlayerExit(GameObject other)
+    {
+        if (other.CompareTag("Player"))
         {
-            if (autoHurtOnEnter)
-                Hurt(interactor);
+            var player = other.GetComponent<PlayerInteract>();
+            if (player != null)
+            {
+                GameObject playerRoot = player.gameObject;
+                if (lastHitTime.ContainsKey(playerRoot))
+                {
+                    lastHitTime.Remove(playerRoot);
+                }
+            }
+        }
+
+        lastHitTime.Remove(other);
+    }
+
+    protected virtual void OnPlayerStay(GameObject other)
+    {
+        if (!stayingDamage) return;
+        if (other.CompareTag("Player"))
+        {
+            var player = other.GetComponent<PlayerInteract>();
+            if (player != null)
+            {
+                HurtPlayer(other);
+            }
         }
     }
 
-    protected virtual void OnPlayerExit(GameObject interactor)
-    {
-        if (interactor != null && lastHitTime.ContainsKey(interactor))
-        {
-            lastHitTime.Remove(interactor);
-        }
-    }
-
-    public void Interact(GameObject interactor)
-    {
-        return;
-    }
 
     // IHurtPlayer 接口实现：对指定 actor 造成伤害（遵循 per-actor 冷却）
     // 这用于敌人的环境伤害（如持续区域/接触伤害），仍然按 hitCooldown 生效
-    public void Hurt(GameObject actor)
+    public void HurtPlayer(GameObject actor)
     {
         if (actor == null) return;
 
@@ -191,17 +190,24 @@ public class Enemy : SceneItem, IHurtPlayer
 
         lastHitTime[key] = now;
 
-        // Debug.Log($"Enemy: Hurt called on actor {key.name}. Damage={damage}");
+        // Debug.Log($"Enemy: HurtPlayer called on actor {key.name}. Damage={damage}");
 
         if (player != null)
         {
-            player.Hurt(damage,this.transform);
+            player.Hurt(damage, this.transform);
         }
         else
         {
             Debug.LogWarning($"Enemy: Actor {actor.name} has no PlayerInteract component to receive damage.");
         }
     }
+
+    #endregion
+
+    #region 挨打的代码
+    
+    [Tooltip("向上的击退力度")]
+    public float KnockbackUp=1f;
 
     // 新增：当受到玩家攻击（外部 hitbox）时调用。采用 attackId 去重，保证同一次攻击对本敌人只造成一次伤害。
     // attackId: 由攻击者在开启攻击时生成并传入（例如 PlayerInteract.currentAttackId）
@@ -224,16 +230,20 @@ public class Enemy : SceneItem, IHurtPlayer
         // 处理受击：将伤害应用到本敌人（而不是反向伤害玩家）
         Debug.Log($"Enemy: ReceiveHit from {attacker?.name} attackId={attackId} damage={damageAmount}");
 
-        TakeDamage(damageAmount, attacker);
+        ReceiveDamage(damageAmount, attacker);
     }
 
-    // 敌人受伤逻辑：减少生命值，播放受击反馈，触发死亡时销毁
-    protected virtual void TakeDamage(int amount, GameObject attacker)
+    /// <summary>
+    /// 受到攻击，减少生命值
+    /// </summary>
+    /// <param name="amount"></param>
+    /// <param name="attacker"></param>
+    protected virtual void ReceiveDamage(int amount, GameObject attacker)
     {
         currentHealth -= amount;
         Debug.Log($"Enemy: Took damage {amount}. Health now {currentHealth}/{maxHealth}");
-
-        // TODO: 播放受击动画、音效、击退等，这里只做基础的逻辑
+        
+        ApplyKnockback(attacker.transform, 8f, 0.25f);
 
         if (currentHealth <= 0)
         {
@@ -241,10 +251,41 @@ public class Enemy : SceneItem, IHurtPlayer
         }
     }
 
+    // 新增：对外接口，应用击退并在短时间内禁用玩家控制
+    public void ApplyKnockback(Transform transform, float force, float stunDuration = 0.35f)
+    {
+        Vector2 dir = transform.position - this.transform.position;
+        if (dir.x > 0)
+        {
+            dir = new Vector2(-1f,KnockbackUp);
+        }
+        else
+        {
+            dir = new Vector2(1f,KnockbackUp);
+        }
+        
+
+        // 开始协程执行击退逻辑
+        StartCoroutine(KnockbackCoroutine(dir, force, stunDuration));
+    }
+
+    private IEnumerator KnockbackCoroutine(Vector2 dir, float force, float stunDuration)
+    {
+        MotionLocked = true;
+        // 施加物理冲量
+        rb.velocity = Vector2.zero;
+        rb.AddForce(dir.normalized * force, ForceMode2D.Impulse);
+
+        // 等待眩晕结束
+        yield return new WaitForSeconds(stunDuration);
+        MotionLocked = false;
+    }
+
     protected virtual void Die(GameObject killer)
     {
         Debug.Log($"Enemy: Died. KilledBy={killer?.name}");
-
+        MotionLocked = true;
+        rb.velocity = new Vector2(0f, rb.velocity.y);
         // 停止之前可能在运行的 Die 协程
         if (dieCoroutine != null)
         {
@@ -285,6 +326,8 @@ public class Enemy : SceneItem, IHurtPlayer
             dieCoroutine = StartCoroutine(FallbackDestroyAfterDelay(destroyFallbackDelay));
         }
     }
+
+    #endregion
 
     protected virtual IEnumerator WaitForDieAnimation()
     {

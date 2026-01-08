@@ -127,9 +127,9 @@ Material:
     - _noiseScale: 0.6
     - _pianli: 1
     - _speed: 2
-    - _strenth: 0.002
+    - _strenth: 0.0024
     - _waterColorStrenth: 2
-    - _waveSpeed: 0.08
+    - _waveSpeed: 0.2
     - _waveStrenth: 3.38
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
@@ -137,7 +137,7 @@ Material:
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
     - _noiseScale_1: {r: 0.5, g: 3, b: 0, a: 0}
-    - _waterColor: {r: 0.41424885, g: 0.63105196, b: 0.8207547, a: 0}
-    - _waveColor: {r: 0.3490566, g: 0.3490566, b: 0.3490566, a: 0}
-    - _waveTiling: {r: -3.28, g: 4.55, b: 0, a: 0}
+    - _waterColor: {r: 0.30558026, g: 0.45977208, b: 0.5943396, a: 0}
+    - _waveColor: {r: 0.20776966, g: 0.23121071, b: 0.2735849, a: 0}
+    - _waveTiling: {r: -3.27, g: 6.68, b: 0, a: 0}
   m_BuildTextureStacks: []
