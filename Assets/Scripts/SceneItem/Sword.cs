@@ -19,6 +19,7 @@ public class Sword : SceneItem,IInteractable
     public void Interact()
     {
         GameManager.Instance.ChangePlayer();
+        Destroy(this.gameObject);
     }
 
     public void Interact(GameObject gameObject)

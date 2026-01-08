@@ -10,7 +10,7 @@ public class PlayerInteract : MonoBehaviour
 
     [Header("Player Stats")] [SerializeField]
     private int maxHealth = 100;
-    
+
     private int _currentHealth = 100;
 
     public int CurrentHealth
@@ -47,7 +47,7 @@ public class PlayerInteract : MonoBehaviour
     {
         InteractableIcon.SetActive(false);
         currentItem = null;
-        
+
         InitPlayer();
     }
 
@@ -55,6 +55,13 @@ public class PlayerInteract : MonoBehaviour
     {
         InteractableIcon.SetActive(false);
         currentItem = null;
+    }
+
+    public void ChangeHealth(int value)
+    {
+
+        CurrentHealth = Mathf.Clamp(CurrentHealth + value, 0, maxHealth);
+        
     }
 
 
@@ -120,7 +127,7 @@ public class PlayerInteract : MonoBehaviour
             }
         }
     }
-    
+
 
     private void Die()
     {

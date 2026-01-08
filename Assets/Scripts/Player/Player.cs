@@ -268,40 +268,11 @@ public class Player : MonoBehaviour
 
     public void WaitForAnimation(string stateName, UnityAction onComplete)
     {
-        StartCoroutine(WaitForAnimationEnd(stateName, onComplete));
+        StartCoroutine(GameManager.Instance.WaitForAnimationEnd(stateName, onComplete,animator));
     }
 
 
-    // 等待指定动画状态播放完毕（基于 state name）
-    private IEnumerator WaitForAnimationEnd(string stateName, UnityAction onComplete)
-    {
-        // 等待动画状态进入
-        float enterTimeout = 2f;
-        float timer = 0f;
-        while (!animator.GetCurrentAnimatorStateInfo(0).IsName(stateName) && timer < enterTimeout)
-        {
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        // 如果没进入指定状态，则直接触发回调以避免无限等待
-        if (!animator.GetCurrentAnimatorStateInfo(0).IsName(stateName))
-        {
-            onComplete?.Invoke();
-            yield break;
-        }
-
-        // 等待动画播放完毕（normalizedTime >= 1 表示播放结束，但如果设置了 Loop 则不会为 >=1）
-        float playTimeout = 10f; // 额外保险超时
-        timer = 0f;
-        while (animator.GetCurrentAnimatorStateInfo(0).normalizedTime < 1f && timer < playTimeout)
-        {
-            timer += Time.deltaTime;
-            yield return null;
-        }
-
-        onComplete?.Invoke();
-    }
+    
 
     #endregion
 }
