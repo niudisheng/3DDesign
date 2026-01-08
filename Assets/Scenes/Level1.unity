@@ -83312,6 +83312,10 @@ PrefabInstance:
       propertyPath: m_BoundingShape2D
       value: 
       objectReference: {fileID: 628349954}
+    - target: {fileID: 5244937446070382273, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6186380636070895125, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_Follow
       value: 

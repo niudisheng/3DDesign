@@ -139368,7 +139368,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1484132386021603061, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 64.52893
+      value: 64.530594
       objectReference: {fileID: 0}
     - target: {fileID: 1484132386021603061, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_LocalPosition.y
@@ -139458,6 +139458,10 @@ PrefabInstance:
       propertyPath: _allVirtualCameras.Array.data[4]
       value: 
       objectReference: {fileID: 1312630299}
+    - target: {fileID: 5244937446070382273, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6186380636070895125, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_Follow
       value: 
@@ -139496,8 +139500,33 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 1754676853892556437, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       insertIndex: 2
       addedObject: {fileID: 490088085}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7536447749191445957, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2109822104}
   m_SourcePrefab: {fileID: 100100000, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
+--- !u!1 &2109822103 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7536447749191445957, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
+  m_PrefabInstance: {fileID: 2109822102}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2109822104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2109822103}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 457239ea48f7d9f468d2e3d6328c0fbf, type: 2}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
