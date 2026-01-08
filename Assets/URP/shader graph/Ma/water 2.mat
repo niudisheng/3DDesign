@@ -125,7 +125,7 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     - _noiseScale: 0.6
-    - _pianli: 1.024736
+    - _pianli: 1.0187564
     - _speed: 0.98
     - _strenth: 0.0024
     - _waterColorStrenth: 2
@@ -137,7 +137,7 @@ Material:
     - _Flip: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
     - _noiseScale_1: {r: 0.5, g: 2.73, b: 0, a: 0}
-    - _waterColor: {r: 0.4528302, g: 0.4528302, b: 0.4528302, a: 0}
-    - _waveColor: {r: 0.23473659, g: 0.23512924, b: 0.23584908, a: 0}
+    - _waterColor: {r: 0.46196377, g: 0.4716981, b: 0.46057314, a: 0}
+    - _waveColor: {r: 0.20776966, g: 0.23121071, b: 0.2735849, a: 0}
     - _waveTiling: {r: -3, g: 5.65, b: 0, a: 0}
   m_BuildTextureStacks: []

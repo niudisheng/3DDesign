@@ -80,6 +80,15 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""GetSword"",
+                    ""type"": ""Button"",
+                    ""id"": ""0d29c333-a9b0-4ee1-87f1-b92c8574a338"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -192,6 +201,17 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""UISettings"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6a3bb48e-3f3f-4025-8a52-f2611e194fc3"",
+                    ""path"": ""<Keyboard>/space"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""GetSword"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -206,6 +226,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player_Dash = m_Player.FindAction("Dash", throwIfNotFound: true);
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_UISettings = m_Player.FindAction("UISettings", throwIfNotFound: true);
+        m_Player_GetSword = m_Player.FindAction("GetSword", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -273,6 +294,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Dash;
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_UISettings;
+    private readonly InputAction m_Player_GetSword;
     public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
@@ -283,6 +305,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Dash => m_Wrapper.m_Player_Dash;
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @UISettings => m_Wrapper.m_Player_UISettings;
+        public InputAction @GetSword => m_Wrapper.m_Player_GetSword;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -310,6 +333,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @UISettings.started += instance.OnUISettings;
             @UISettings.performed += instance.OnUISettings;
             @UISettings.canceled += instance.OnUISettings;
+            @GetSword.started += instance.OnGetSword;
+            @GetSword.performed += instance.OnGetSword;
+            @GetSword.canceled += instance.OnGetSword;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -332,6 +358,9 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @UISettings.started -= instance.OnUISettings;
             @UISettings.performed -= instance.OnUISettings;
             @UISettings.canceled -= instance.OnUISettings;
+            @GetSword.started -= instance.OnGetSword;
+            @GetSword.performed -= instance.OnGetSword;
+            @GetSword.canceled -= instance.OnGetSword;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -357,5 +386,6 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnDash(InputAction.CallbackContext context);
         void OnInteract(InputAction.CallbackContext context);
         void OnUISettings(InputAction.CallbackContext context);
+        void OnGetSword(InputAction.CallbackContext context);
     }
 }

@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class SavePoint : SceneItem,IInteractable
 {
+    public Sound saveSound;
     public GameObject campFire;
     public void OnPlayerEnter(GameObject player)
     {
@@ -19,6 +20,7 @@ public class SavePoint : SceneItem,IInteractable
     public void Interact()
     {
         campFire.SetActive(true);
+        SoundManager.Instance.PlaySound(saveSound);
         GameManager.Instance.SaveGame(Player.instance.gameObject);
     }
 
