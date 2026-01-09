@@ -63,6 +63,11 @@ public class PlayerInteract : MonoBehaviour
         CurrentHealth = Mathf.Clamp(CurrentHealth + value, 0, maxHealth);
         
     }
+    public void Heal(int value)
+    {
+        maxHealth += value;
+        CurrentHealth = maxHealth;
+    }
 
 
     #region 受伤与死亡代码
