@@ -22,7 +22,7 @@ public class Heart : SceneItem,IInteractable
 
     public void Interact()
     {
-        Player.instance.playerInteract.ChangeHealth(30);
+        Player.instance.playerInteract.Heal(30);
         
         animator.SetTrigger("HeartFade");
         StartCoroutine(GameManager.Instance.WaitForAnimationEnd(
