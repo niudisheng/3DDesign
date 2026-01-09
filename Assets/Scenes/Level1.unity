@@ -29217,6 +29217,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a0751bb31fa566c4e8cdd3911358947d, type: 2}
   - {fileID: 11400000, guid: 65094fe14691d8f4f89005afcc79d369, type: 2}
   WalkSoundGroup: {fileID: 11400000, guid: e4632882f860541469f9b188e1e30bc2, type: 2}
+  GetSword: {fileID: 11400000, guid: 07fc8cba2e53d87438ed632dcbf7cb30, type: 2}
 --- !u!1 &827728214 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4918009690059824607, guid: 4ccd6128cdbc91b47b76ddd4d24555cd, type: 3}
@@ -84250,15 +84251,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1484132386021603061, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 62.27
+      value: 44.820515
       objectReference: {fileID: 0}
     - target: {fileID: 1484132386021603061, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.01
+      value: 0.25999
       objectReference: {fileID: 0}
     - target: {fileID: 1484132386021603061, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -10
+      value: -32.89522
       objectReference: {fileID: 0}
     - target: {fileID: 1754676853892556437, guid: 35efaddcb17ff9e469b1c8e307ad6899, type: 3}
       propertyPath: m_LocalPosition.x
