@@ -31,7 +31,6 @@ public class UIManage : MonoBehaviour
             return; 
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
         if (!isInitialized)
         {
             Initialize();
