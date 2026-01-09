@@ -200,6 +200,7 @@ public class Player : MonoBehaviour
     {
         animator.SetTrigger("GetSword");
         LockModules();
+        playerSound.PlayGetSwordSound();
         WaitForAnimation("GetSword", () =>
         {
             SetSword(true);

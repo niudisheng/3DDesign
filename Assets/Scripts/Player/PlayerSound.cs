@@ -7,7 +7,8 @@ public class PlayerSound : MonoBehaviour
     public static PlayerSound Instance;
     public Sound[] AttackSound;
     public SoundGroup WalkSoundGroup;
-
+    public Sound GetSword;
+    
     private void Awake()
     {
         if (Instance == null)
@@ -29,5 +30,9 @@ public class PlayerSound : MonoBehaviour
     public void PlayWalkSound()
     {
         SoundManager.Instance.PlaySoundGroup(WalkSoundGroup);
+    }
+    public void PlayGetSwordSound()
+    {
+        SoundManager.Instance.PlaySound(GetSword);
     }
 }
