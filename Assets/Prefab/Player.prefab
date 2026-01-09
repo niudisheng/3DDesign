@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 679249193926054025}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.28, z: 0}
+  m_LocalPosition: {x: 0, y: -1.77, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -96,8 +96,8 @@ CapsuleCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 1.7089243, y: 0}
-  m_Size: {x: 3.5, y: 1.01}
+  m_Offset: {x: 1.7089242, y: -0.29275867}
+  m_Size: {x: 3.500001, y: 2.1465945}
   m_Direction: 1
 --- !u!114 &155886156608349204
 MonoBehaviour:
@@ -168,7 +168,8 @@ MonoBehaviour:
   animator: {fileID: 0}
   faceDir: 1
   playerController: {fileID: 6280497588084587949}
-  haveSword: 0
+  playerSound: {fileID: 4466440489210734274}
+  haveSword: 1
   _cameraFollowGo: {fileID: 0}
 --- !u!114 &4794785165894857012
 MonoBehaviour:
@@ -183,9 +184,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitbox: {fileID: 4931658014154894922}
-  maxHealth: 100
-  currentHealth: 100
-  invincibleDuration: 1
+  maxHealth: 50
+  invincibleDuration: 0.5
   attackDamage: 10
   InteractableIcon: {fileID: 7016098376676817268}
 --- !u!114 &6280497588084587949
@@ -286,6 +286,7 @@ GameObject:
   - component: {fileID: 7409493046080539325}
   - component: {fileID: 2778172300095362428}
   - component: {fileID: 2944720018960467589}
+  - component: {fileID: 4466440489210734274}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -397,6 +398,24 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4466440489210734274
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6000535449414696939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 837e3c4d924171a48a81700fbecf3dfe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  AttackSound:
+  - {fileID: 11400000, guid: 7db75caf286bc5d408a31dc74eb555e4, type: 2}
+  - {fileID: 11400000, guid: a0751bb31fa566c4e8cdd3911358947d, type: 2}
+  - {fileID: 11400000, guid: 65094fe14691d8f4f89005afcc79d369, type: 2}
+  WalkSoundGroup: {fileID: 11400000, guid: e4632882f860541469f9b188e1e30bc2, type: 2}
+  GetSword: {fileID: 11400000, guid: 07fc8cba2e53d87438ed632dcbf7cb30, type: 2}
 --- !u!1 &7016098376676817268
 GameObject:
   m_ObjectHideFlags: 0

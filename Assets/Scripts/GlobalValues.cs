@@ -9,6 +9,8 @@ public class GlobalValues : MonoBehaviour
     {
         // 可根据需要改为属性
         public static int StartScene = 1;
+        public static int Level1 = 2;
+        public static int Level2 = 3;
     }
 
 

@@ -70,6 +70,10 @@ public class Player : MonoBehaviour
     private void Start()
     {
         playerStateController.ChangeAnimator(haveSword);
+        if (haveSword)
+        {
+            SetSword(true);
+        }
     }
 
     private void Update()
