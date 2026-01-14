@@ -15,13 +15,15 @@ public class Player : MonoBehaviour
     // 运动相关
 
 
-    [Header("公共变量")] [HideInInspector] public Rigidbody2D rb;
+    [Header("公共变量")] 
+    [HideInInspector] public Rigidbody2D rb;
     public PlayerStateController playerStateController;
     public PlayerInteract playerInteract;
+    public PlayerController playerController;
+    public PlayerActionControler playerActionControler;
     [HideInInspector] public Animator animator;
     [HideInInspector] public PlayerControls controls;
     [HideInInspector] public int faceDir = 1; // 1 向右，-1 向左
-    public PlayerController playerController;
     public PlayerSound playerSound;
     private Transform _spriteTransform;
 

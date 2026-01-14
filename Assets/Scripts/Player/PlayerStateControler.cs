@@ -53,6 +53,7 @@ public class PlayerStateController : MonoBehaviour
 
     public void ChangeState(State newState)
     {
+        Debug.LogWarning("ChangeState to: " + newState);
         if (currentState == newState)
             return;
 

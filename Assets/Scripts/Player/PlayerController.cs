@@ -16,11 +16,11 @@ public class PlayerController : MonoBehaviour
     private PlayerInteract playerInteract => Player.instance.playerInteract;
     private Rigidbody2D rb => Player.instance.rb;
     private PlayerStateController playerStateController => Player.instance.playerStateController;
-
+    private PlayerActionControler playerActionControler => Player.instance.playerActionControler;
     #region 运动状态相关变量
 
     public bool canJumping = true;
-    public bool isGrounded;
+    
     private bool isDashing = false;
 
     private bool isAttacking = false;
@@ -82,19 +82,11 @@ public class PlayerController : MonoBehaviour
 
     private void TryJump()
     {
-        if (canJumping && CanMove() && isGrounded)
-        {
-            Jump();
-        }
+        playerActionControler.AddInput(InputIntent.Jump);
+        return;
     }
 
-    private void Jump()
-    {
-        rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
-        playerStateController.ChangeState(State.Jump);
-        canJumping = false;
-        isGrounded = false;
-    }
+
 
     #endregion
 
@@ -149,75 +141,12 @@ public class PlayerController : MonoBehaviour
 
     #endregion
 
-    #region Ground Check
-
-    [Header("Ground Settings")] public float groundCheckDistance = 0.1f;
-    public Transform groundCheckPoint; // 脚底检测点
-    public LayerMask groundLayer;
-
-    // public bool IsGrounded { get; private set; }
+    
 
 
-    private void CheckGround()
-    {
-        // 射线向下检测
-        RaycastHit2D hit = Physics2D.Raycast(groundCheckPoint.position, Vector2.down, groundCheckDistance, groundLayer);
-        // Debug.Log(hit.collider);
+    
 
-        isGrounded = hit.collider != null;
-
-
-        // 可视化射线
-        Color color = isGrounded ? Color.green : Color.red;
-        Debug.DrawRay(groundCheckPoint.position, Vector2.down * groundCheckDistance, color);
-    }
-
-
-    void Update()
-    {
-        DownCheck();
-
-        if (Mathf.Approximately(rb.velocity.x, 0f) && isGrounded && moveInputVector2.x == 0f)
-        {
-            playerStateController.ChangeState(State.Idle);
-        }
-
-        else
-        {
-            if (isGrounded)
-            {
-                playerStateController.ChangeState(State.Walk);
-            }
-        }
-    }
-
-    private void DownCheck()
-    {
-        if (rb.velocity.y < 0f && playerStateController.GetCurrentState() != State.Down && !isGrounded)
-        {
-            StartCoroutine(DownCoroutine());
-        }
-    }
-
-    private IEnumerator DownCoroutine()
-    {
-        // 当上升到顶点速度变为0（或以下）时，切换到下落状态
-        playerStateController.ChangeState(State.Down);
-
-        // 等待落地
-        while (!isGrounded)
-        {
-            //下落时才进行地面检测
-            CheckGround();
-            yield return null;
-        }
-
-        canJumping = true;
-
-        playerStateController.DisableState(State.Down);
-    }
-
-    #endregion
+    
 
     #region 击退代码
 

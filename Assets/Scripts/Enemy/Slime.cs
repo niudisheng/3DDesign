@@ -115,8 +115,6 @@ public class Slime : Enemy
             return;
         }
 
-        Debug.Log("IsGrounded(): " + IsGrounded());
-
 
         // 发起一次跳跃：设置瞬时速度（x 和 y）然后进入冷却
         if (rb != null)
