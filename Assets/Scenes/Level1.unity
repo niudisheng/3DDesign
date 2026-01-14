@@ -82686,8 +82686,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eab760a8daef6d4796f6a2b7214b8c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  dashSpeed: 20
   jumpSpeed: 16
+  dashDuration: 0.25
   isGrounded: 0
+  moveSpeed: 8
   groundCheckDistance: 0.1
   groundCheckPoint: {fileID: 2012323812}
   groundLayer:

@@ -6,27 +6,20 @@ using State = PlayerStateController.State;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("Movement Settings")] public float moveSpeed = 8f;
-    public float dashSpeed = 20f;
-    public float jumpSpeed = 16f;
-    public Vector2 moveInputVector2;
-    public float dashDuration = 0.3f;
+    [Header("Movement Settings")] public Vector2 moveInputVector2;
+
 
     private PlayerControls controls => Player.instance.controls;
     private PlayerInteract playerInteract => Player.instance.playerInteract;
     private Rigidbody2D rb => Player.instance.rb;
     private PlayerStateController playerStateController => Player.instance.playerStateController;
     private PlayerActionControler playerActionControler => Player.instance.playerActionControler;
+
     #region 运动状态相关变量
-
-    public bool canJumping = true;
-    
-    private bool isDashing = false;
-
-    private bool isAttacking = false;
 
     // 新增：击退/眩晕标志，击退期间应该禁止玩家控制
     private bool isStunned = false;
+    public float MoveValue; 
 
     #endregion
 
@@ -34,13 +27,16 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         // 监听输入
-        controls.Player.Move.performed += ctx => moveInputVector2 = ctx.ReadValue<Vector2>();
-        controls.Player.Move.canceled += ctx => moveInputVector2 = Vector2.zero;
+        controls.Player.Move.performed += ctx => { TryMove(ctx.ReadValue<Vector2>()); };
+
+        controls.Player.Move.canceled += ctx => CancelMove();
+        controls.Player.MoveLeft.performed += ctx => TryMove(false);
+        controls.Player.MoveRight.performed += ctx => TryMove(true);
         controls.Player.Jump.performed += ctx => TryJump();
         controls.Player.Dash.performed += ctx => TryDash();
         controls.Player.Interact.performed += ctx => playerInteract.TryInteract();
         controls.Player.Attack.performed += ctx => TryAttack();
-        
+
         //测试用拔剑
         controls.Player.GetSword.performed += ctx => GameManager.Instance.ChangePlayer();
         SetEndAttack();
@@ -57,12 +53,9 @@ public class PlayerController : MonoBehaviour
 
     public void TryAttack()
     {
-        if (CanMove() && Player.instance.haveSword)
+        if (Player.instance.haveSword)
         {
-            isAttacking = true;
-            playerInteract.Attack(true);
-            playerStateController.ChangeState(State.Attack);
-            rb.velocity = new Vector2(0, rb.velocity.y); // 攻击时锁定水平速度
+            playerActionControler.AddInput(InputIntent.Attack);
         }
     }
 
@@ -71,9 +64,7 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public void EndAttack()
     {
-        isAttacking = false;
-        playerInteract.Attack(false);
-        playerStateController.DisableState(State.Attack);
+        playerActionControler.EndAttack();
     }
 
     #endregion
@@ -86,67 +77,74 @@ public class PlayerController : MonoBehaviour
         return;
     }
 
-
-
     #endregion
 
 
     #region Move
 
-    void FixedUpdate()
+    private void TryMove(Vector2 ctx)
     {
-        if (CanMove())
+        return;
+        if (ctx == Vector2.zero)
         {
-            Move(); // 冲刺时禁止 Move()
+            moveInputVector2 = new Vector2(-moveInputVector2.x, ctx.y);
         }
+        else
+        {
+            moveInputVector2 = ctx;
+        }
+        Debug.Log("Move Input: " + moveInputVector2);
+
+        playerActionControler.Move();
     }
-
-    /// <summary>
-    /// 是否能自由移动，不在冲刺或攻击状态中
-    /// </summary>
-    /// <returns></returns>
-    private bool CanMove()
+    private void TryMove(bool isRight)
     {
-        // 将 isStunned 纳入判断，眩晕/击退期间禁止移动
-        return !isDashing && !isAttacking && !isStunned;
+        //当前没有输入，添加新的方向
+        if (moveInputVector2 == Vector2.zero)
+        {
+            if (isRight)
+            {
+                moveInputVector2 = new Vector2(1, 0);
+            }
+            else
+            {
+                moveInputVector2 = new Vector2(-1, 0);
+            }
+        }
+        else
+        {
+            //当前有输入，判断是否与当前方向相同
+            if (isRight && moveInputVector2.x < 0)
+            {
+                moveInputVector2 = new Vector2(-moveInputVector2.x, moveInputVector2.y);
+            }
+            else if (!isRight && moveInputVector2.x > 0)
+            {
+                moveInputVector2 = new Vector2(-moveInputVector2.x, moveInputVector2.y);
+            }
+        }
+        
+        Debug.Log("Move Input: " + moveInputVector2);
+
+        playerActionControler.Move();
     }
-
-    private void Move()
+    
+    
+    
+    
+    private void CancelMove()
     {
-        float moveX = moveInputVector2.x * moveSpeed;
-        rb.velocity = new Vector2(moveX, rb.velocity.y);
-
-        Player.instance.ChangeDir(moveX);
+        moveInputVector2 = Vector2.zero;
+        playerActionControler.Move();
     }
 
     #endregion
-
-    #region Dash
 
     private void TryDash()
     {
-        if (CanMove())
-            StartCoroutine(DashCoroutine());
+        playerActionControler.AddInput(InputIntent.Dash);
     }
 
-    private IEnumerator DashCoroutine()
-    {
-        isDashing = true;
-        rb.velocity = new Vector2(Player.instance.faceDir * dashSpeed, 0f); // 冲刺锁定方向，并锁 y
-        playerStateController.ChangeState(State.Dash);
-        yield return new WaitForSeconds(dashDuration);
-        playerStateController.DisableState(State.Dash);
-        isDashing = false;
-    }
-
-    #endregion
-
-    
-
-
-    
-
-    
 
     #region 击退代码
 
@@ -172,9 +170,6 @@ public class PlayerController : MonoBehaviour
         // 标记为眩晕，阻止输入和移动
         isStunned = true;
 
-        // 中断冲刺/攻击状态
-        isDashing = false;
-        isAttacking = false;
 
         // 设置受击状态动画
         if (playerStateController != null)

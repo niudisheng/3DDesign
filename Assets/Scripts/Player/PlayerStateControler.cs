@@ -53,7 +53,7 @@ public class PlayerStateController : MonoBehaviour
 
     public void ChangeState(State newState)
     {
-        Debug.LogWarning("ChangeState to: " + newState);
+        // Debug.LogWarning("ChangeState to: " + newState);
         if (currentState == newState)
             return;
 
@@ -91,7 +91,7 @@ public class PlayerStateController : MonoBehaviour
         {
             switch (state)
             {
-                case State.Dash:
+                // case State.Dash:
                 case State.Attack:
                 case State.Hurt:
                     continue;

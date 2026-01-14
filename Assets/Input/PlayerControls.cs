@@ -89,6 +89,24 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveLeft"",
+                    ""type"": ""Button"",
+                    ""id"": ""80706751-852e-4768-8ee2-361ec7657423"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MoveRight"",
+                    ""type"": ""Button"",
+                    ""id"": ""521e1ad7-120a-433a-9c3c-249428f606b1"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -212,6 +230,28 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""GetSword"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6b7d2e24-e672-4640-98d4-ceb6ed7d3676"",
+                    ""path"": ""<Keyboard>/a"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveLeft"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ce7983ac-4618-41e9-a741-fe326e3fff4d"",
+                    ""path"": ""<Keyboard>/d"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""MoveRight"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -227,6 +267,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_UISettings = m_Player.FindAction("UISettings", throwIfNotFound: true);
         m_Player_GetSword = m_Player.FindAction("GetSword", throwIfNotFound: true);
+        m_Player_MoveLeft = m_Player.FindAction("MoveLeft", throwIfNotFound: true);
+        m_Player_MoveRight = m_Player.FindAction("MoveRight", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -295,6 +337,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_UISettings;
     private readonly InputAction m_Player_GetSword;
+    private readonly InputAction m_Player_MoveLeft;
+    private readonly InputAction m_Player_MoveRight;
     public struct PlayerActions
     {
         private @PlayerControls m_Wrapper;
@@ -306,6 +350,8 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @UISettings => m_Wrapper.m_Player_UISettings;
         public InputAction @GetSword => m_Wrapper.m_Player_GetSword;
+        public InputAction @MoveLeft => m_Wrapper.m_Player_MoveLeft;
+        public InputAction @MoveRight => m_Wrapper.m_Player_MoveRight;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -336,6 +382,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @GetSword.started += instance.OnGetSword;
             @GetSword.performed += instance.OnGetSword;
             @GetSword.canceled += instance.OnGetSword;
+            @MoveLeft.started += instance.OnMoveLeft;
+            @MoveLeft.performed += instance.OnMoveLeft;
+            @MoveLeft.canceled += instance.OnMoveLeft;
+            @MoveRight.started += instance.OnMoveRight;
+            @MoveRight.performed += instance.OnMoveRight;
+            @MoveRight.canceled += instance.OnMoveRight;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -361,6 +413,12 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @GetSword.started -= instance.OnGetSword;
             @GetSword.performed -= instance.OnGetSword;
             @GetSword.canceled -= instance.OnGetSword;
+            @MoveLeft.started -= instance.OnMoveLeft;
+            @MoveLeft.performed -= instance.OnMoveLeft;
+            @MoveLeft.canceled -= instance.OnMoveLeft;
+            @MoveRight.started -= instance.OnMoveRight;
+            @MoveRight.performed -= instance.OnMoveRight;
+            @MoveRight.canceled -= instance.OnMoveRight;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -387,5 +445,7 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         void OnInteract(InputAction.CallbackContext context);
         void OnUISettings(InputAction.CallbackContext context);
         void OnGetSword(InputAction.CallbackContext context);
+        void OnMoveLeft(InputAction.CallbackContext context);
+        void OnMoveRight(InputAction.CallbackContext context);
     }
 }
