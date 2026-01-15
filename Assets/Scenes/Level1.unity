@@ -82692,6 +82692,48 @@ MonoBehaviour:
   dashCanMoveTime: 0.15
   isGrounded: 0
   moveSpeed: 8
+  dashCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: -0.0030059814
+      value: 1.5
+      inSlope: -0.9900793
+      outSlope: -0.9900793
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.3
+      value: 1.2
+      inSlope: -1.2450397
+      outSlope: -1.2450397
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.7
+      value: 0.6
+      inSlope: -1.4166667
+      outSlope: -1.4166667
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0.2
+      inSlope: -1.3333334
+      outSlope: -1.3333334
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   groundCheckDistance: 0.1
   groundCheckPoint: {fileID: 2012323812}
   groundLayer:

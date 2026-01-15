@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using State = PlayerStateController.State;
 
@@ -17,6 +15,8 @@ public class PlayerActionControler : MonoBehaviour
     public Vector2 moveInputVector2 => Player.instance.playerController.moveInputVector2;
     public bool isGrounded;
     public float moveSpeed = 8f;
+
+    public AnimationCurve dashCurve;
 
     // 是否用过冲刺
     private bool isDashing = false;
@@ -59,17 +59,15 @@ public class PlayerActionControler : MonoBehaviour
         if (CanMove())
         {
             JumpDownCheck();
-            if (isGrounded && moveInputVector2.x == 0f)
+            if (!isGrounded) return;
+            if (Mathf.Approximately(moveInputVector2.x, 0f))
             {
                 playerStateController.ChangeState(State.Idle);
             }
 
             else
             {
-                if (isGrounded)
-                {
-                    playerStateController.ChangeState(State.Walk);
-                }
+                playerStateController.ChangeState(State.Walk);
             }
         }
     }
@@ -131,7 +129,6 @@ public class PlayerActionControler : MonoBehaviour
 
     #endregion
 
-    #region Dash
 
     private void DashCheck()
     {
@@ -141,7 +138,6 @@ public class PlayerActionControler : MonoBehaviour
         }
     }
 
-    #endregion
 
     public void MoveCheck()
     {
@@ -151,15 +147,71 @@ public class PlayerActionControler : MonoBehaviour
         }
     }
 
+    private void ApplyHorizontalMove(AnimationCurve accelCurve, float inputX)
+    {
+        float groundAccel = 25f;
+        float groundDecel = 45f;
+        float groundMaxSpeed = moveSpeed;
+
+        double airAccel = groundAccel * 0.6;
+        double airDecel = groundDecel * 0.8;
+        double airMaxSpeed = groundMaxSpeed * 0.95;
+
+
+        double maxSpeed = isGrounded ? groundMaxSpeed : airMaxSpeed;
+
+
+        float targetSpeed = inputX * groundMaxSpeed;
+
+        // 计算速度差
+        float speedDiff = targetSpeed - rb.velocity.x;
+        // 如果速度差很小，直接设置速度,保持最高速度可达和保证静态不动
+        
+
+
+        // 归一化当前速度
+        float normalizedSpeed = (float)(Mathf.Abs(rb.velocity.x) / maxSpeed);
+        if (Mathf.Abs(normalizedSpeed) < 0.1f)
+        {
+            rb.velocity = new Vector2(targetSpeed, rb.velocity.y);
+            return;
+        }
+        Debug.Log("normalizedSpeed: " + normalizedSpeed);
+        // 曲线倍率
+        float accelMultiplier = accelCurve.Evaluate(normalizedSpeed);
+
+        // 基础加速度值，可以根据需要调整
+
+
+        double accel = isGrounded ? groundAccel : airAccel;
+        double decel = isGrounded ? groundDecel : airDecel;
+        // 玩家是否有输入
+        bool hasInput = Mathf.Abs(inputX) > 0.01f;
+        double rate = hasInput ? accel : decel;
+
+
+        float movement = (float)(speedDiff *
+                                 accelMultiplier *
+                                 rate *
+                                 Time.fixedDeltaTime);
+
+        rb.velocity += new Vector2(movement, 0f);
+    }
+
 
     #region All Actions
 
     private void Move()
     {
         float moveX = moveInputVector2.x * moveSpeed;
-        // Debug.Log("MoveX: " + moveX);
-        rb.velocity = new Vector2(moveX, rb.velocity.y);
 
+        // float moveX = ApplyHorizontalMove(dashCurve, moveInputVector2.x);
+        // Debug.Log("MoveX: " + moveX);
+
+        // rb.velocity = new Vector2(moveX, rb.velocity.y);
+        
+        ApplyHorizontalMove(dashCurve, moveInputVector2.x);
+        Debug.Log("Velocity X: " + rb.velocity.x);
         Player.instance.ChangeDir(moveX);
     }
 
@@ -190,7 +242,7 @@ public class PlayerActionControler : MonoBehaviour
 
         yield return new WaitForSeconds(dashCanMoveTime);
 
-        bool result = OnDashCheck(dashCanMoveTime,dashFair);
+        bool result = OnDashCheck(dashCanMoveTime, dashFair);
         if (result)
         {
             isDashing = false;
@@ -203,7 +255,7 @@ public class PlayerActionControler : MonoBehaviour
         playerStateController.DisableState(State.Dash);
     }
 
-    private bool OnDashCheck(float dashCanMoveTime,int dashFair)
+    private bool OnDashCheck(float dashCanMoveTime, int dashFair)
     {
         if (inputBuffer.TryConsume(InputIntent.Jump, dashCanMoveTime))
         {
@@ -219,7 +271,6 @@ public class PlayerActionControler : MonoBehaviour
                 Move();
                 return true;
             }
-            
         }
 
 
