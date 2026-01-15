@@ -38,9 +38,13 @@ public class PlayerActionControler : MonoBehaviour
 
     private void GroundJumpCheck()
     {
-        if (isGrounded && inputBuffer.TryConsume(InputIntent.Jump, 0.2f))
+        if (isGrounded && CanMove())
+
         {
-            Jump();
+            if (inputBuffer.TryConsume(InputIntent.Jump, 0.2f))
+            {
+                Jump();
+            }
         }
     }
 
@@ -72,7 +76,7 @@ public class PlayerActionControler : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Move();
+        MoveCheck();
         GroundJumpCheck();
         DashCheck();
     }
@@ -131,7 +135,7 @@ public class PlayerActionControler : MonoBehaviour
 
     private void DashCheck()
     {
-        if (inputBuffer.TryConsume(InputIntent.Dash, 0.1f) && !isDashing)
+        if (inputBuffer.TryConsume(InputIntent.Dash, 0.1f) && CanMove())
         {
             Dash();
         }
@@ -139,16 +143,19 @@ public class PlayerActionControler : MonoBehaviour
 
     #endregion
 
+    public void MoveCheck()
+    {
+        if (CanMove())
+        {
+            Move();
+        }
+    }
+
 
     #region All Actions
 
-    public void Move()
+    private void Move()
     {
-        if (!CanMove())
-        {
-            return;
-        }
-
         float moveX = moveInputVector2.x * moveSpeed;
         // Debug.Log("MoveX: " + moveX);
         rb.velocity = new Vector2(moveX, rb.velocity.y);
@@ -178,14 +185,45 @@ public class PlayerActionControler : MonoBehaviour
 
     private IEnumerator DashCoroutine()
     {
+        int dashFair = Player.instance.faceDir;
         rb.velocity = new Vector2(Player.instance.faceDir * dashSpeed, 0f); // 冲刺锁定方向，并锁 y
-        
+
         yield return new WaitForSeconds(dashCanMoveTime);
-        // TODO: 允许冲刺中途改变方向,但我没有时间做了
+
+        bool result = OnDashCheck(dashCanMoveTime,dashFair);
+        if (result)
+        {
+            isDashing = false;
+            yield break;
+        }
+
         yield return new WaitForSeconds(dashDuration - dashCanMoveTime);
         isDashing = false;
 
         playerStateController.DisableState(State.Dash);
+    }
+
+    private bool OnDashCheck(float dashCanMoveTime,int dashFair)
+    {
+        if (inputBuffer.TryConsume(InputIntent.Jump, dashCanMoveTime))
+        {
+            Jump();
+            return true;
+        }
+
+        else if (inputBuffer.TryConsume(InputIntent.Move, dashCanMoveTime))
+        {
+            // 冲刺时的方向与移动方向不同，取消冲刺状态
+            if (dashFair != moveInputVector2.x)
+            {
+                Move();
+                return true;
+            }
+            
+        }
+
+
+        return false;
     }
 
 

@@ -73,6 +73,7 @@ public class PlayerController : MonoBehaviour
 
     private void TryJump()
     {
+        
         playerActionControler.AddInput(InputIntent.Jump);
         return;
     }
@@ -95,7 +96,7 @@ public class PlayerController : MonoBehaviour
         }
         Debug.Log("Move Input: " + moveInputVector2);
 
-        playerActionControler.Move();
+        playerActionControler.MoveCheck();
     }
     private void TryMove(bool isRight)
     {
@@ -113,7 +114,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            //当前有输入，判断是否与当前方向相同
+            // 相对于当前输入取反
             if (isRight && moveInputVector2.x < 0)
             {
                 moveInputVector2 = new Vector2(-moveInputVector2.x, moveInputVector2.y);
@@ -126,7 +127,8 @@ public class PlayerController : MonoBehaviour
         
         Debug.Log("Move Input: " + moveInputVector2);
 
-        playerActionControler.Move();
+        playerActionControler.MoveCheck();
+        playerActionControler.AddInput(InputIntent.Move);
     }
     
     
@@ -135,7 +137,7 @@ public class PlayerController : MonoBehaviour
     private void CancelMove()
     {
         moveInputVector2 = Vector2.zero;
-        playerActionControler.Move();
+        playerActionControler.MoveCheck();
     }
 
     #endregion
