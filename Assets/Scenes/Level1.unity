@@ -82686,11 +82686,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8eab760a8daef6d4796f6a2b7214b8c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dashSpeed: 20
+  dashSpeed: 18
   jumpSpeed: 16
   dashDuration: 0.25
   dashCanMoveTime: 0.15
-  isGrounded: 0
+  isGrounded: 1
   moveSpeed: 8
   dashCurve:
     serializedVersion: 2
@@ -82739,6 +82739,13 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  jumpForce: 17
+  maxJumpHoldTime: 0.2
+  gravityScale: 3
+  fallGravityMultiplier: 2
+  jumpCutMultiplier: 0.5
+  apexGravityMultiplier: 0.5
+  apexThreshold: 0.5
 --- !u!1 &1739794912 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3586788410393128208, guid: 919b3eb1d616f684fbdbfb479cb2ca54, type: 3}

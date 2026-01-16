@@ -62,8 +62,8 @@ public abstract class Tile : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log($"[Tile] OnTriggerEnter2D called on '{gameObject.name}' with '{other.gameObject.name}'. Components: " +
-                  $"HasCollider={GetComponent<Collider2D>()!=null}, IsTrigger={GetComponent<Collider2D>()?.isTrigger}, OtherIsTrigger={other.isTrigger}");
+        // Debug.Log($"[Tile] OnTriggerEnter2D called on '{gameObject.name}' with '{other.gameObject.name}'. Components: " +
+                  // $"HasCollider={GetComponent<Collider2D>()!=null}, IsTrigger={GetComponent<Collider2D>()?.isTrigger}, OtherIsTrigger={other.isTrigger}");
 
         if (other.gameObject.CompareTag("hitbox"))
         {

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using State = PlayerStateController.State;
 
 public class PlayerController : MonoBehaviour
@@ -19,7 +20,7 @@ public class PlayerController : MonoBehaviour
 
     // 新增：击退/眩晕标志，击退期间应该禁止玩家控制
     private bool isStunned = false;
-    public float MoveValue; 
+    public float MoveValue;
 
     #endregion
 
@@ -32,7 +33,9 @@ public class PlayerController : MonoBehaviour
         controls.Player.Move.canceled += ctx => CancelMove();
         controls.Player.MoveLeft.performed += ctx => TryMove(false);
         controls.Player.MoveRight.performed += ctx => TryMove(true);
-        controls.Player.Jump.performed += ctx => TryJump();
+        // controls.Player.Jump.performed += ctx => TryJump();
+        controls.Player.Jump.started += OnStartJump;
+        controls.Player.Jump.canceled += OnEndJump;
         controls.Player.Dash.performed += ctx => TryDash();
         controls.Player.Interact.performed += ctx => playerInteract.TryInteract();
         controls.Player.Attack.performed += ctx => TryAttack();
@@ -71,11 +74,15 @@ public class PlayerController : MonoBehaviour
 
     #region Jump
 
-    private void TryJump()
+    private void OnStartJump(InputAction.CallbackContext ctx)
     {
-        
+        playerActionControler.JumpCheck();
         playerActionControler.AddInput(InputIntent.Jump);
-        return;
+    }
+
+    private void OnEndJump(InputAction.CallbackContext ctx)
+    {
+        playerActionControler.OnJumpCanceled();
     }
 
     #endregion
@@ -94,10 +101,12 @@ public class PlayerController : MonoBehaviour
         {
             moveInputVector2 = ctx;
         }
+
         Debug.Log("Move Input: " + moveInputVector2);
 
         playerActionControler.MoveCheck();
     }
+
     private void TryMove(bool isRight)
     {
         //当前没有输入，添加新的方向
@@ -124,16 +133,14 @@ public class PlayerController : MonoBehaviour
                 moveInputVector2 = new Vector2(-moveInputVector2.x, moveInputVector2.y);
             }
         }
-        
+
         Debug.Log("Move Input: " + moveInputVector2);
 
         playerActionControler.MoveCheck();
         playerActionControler.AddInput(InputIntent.Move);
     }
-    
-    
-    
-    
+
+
     private void CancelMove()
     {
         moveInputVector2 = Vector2.zero;

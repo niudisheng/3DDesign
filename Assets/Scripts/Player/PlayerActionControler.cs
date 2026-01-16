@@ -1,9 +1,12 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using State = PlayerStateController.State;
 
 public class PlayerActionControler : MonoBehaviour
 {
+    #region 一坨变量
+
     private InputBuffer inputBuffer;
     private Rigidbody2D rb => Player.instance.rb;
     private PlayerStateController playerStateController => Player.instance.playerStateController;
@@ -26,6 +29,8 @@ public class PlayerActionControler : MonoBehaviour
 
     private bool isAttacking = false;
 
+    #endregion
+
     private void OnEnable()
     {
         inputBuffer = new InputBuffer();
@@ -36,14 +41,17 @@ public class PlayerActionControler : MonoBehaviour
         inputBuffer = null;
     }
 
-    private void GroundJumpCheck()
+    public void JumpCheck()
     {
-        if (isGrounded && CanMove())
-
+        if (CanMove())
         {
-            if (inputBuffer.TryConsume(InputIntent.Jump, 0.2f))
+            ApplyJumpPhysics();
+            if (isGrounded)
             {
-                Jump();
+                if (inputBuffer.TryConsume(InputIntent.Jump, 0.2f))
+                {
+                    Jump();
+                }
             }
         }
     }
@@ -72,10 +80,13 @@ public class PlayerActionControler : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 存放物理逻辑
+    /// </summary>
     private void FixedUpdate()
     {
         MoveCheck();
-        GroundJumpCheck();
+        JumpCheck();
         DashCheck();
     }
 
@@ -87,23 +98,10 @@ public class PlayerActionControler : MonoBehaviour
     public LayerMask groundLayer;
 
 
-    private void CheckGround()
-    {
-        // 射线向下检测
-        RaycastHit2D hit = Physics2D.Raycast(groundCheckPoint.position, Vector2.down, groundCheckDistance, groundLayer);
-
-
-        isGrounded = hit.collider != null;
-
-
-        // 可视化射线
-        Color color = isGrounded ? Color.green : Color.red;
-        Debug.DrawRay(groundCheckPoint.position, Vector2.down * groundCheckDistance, color);
-    }
-
-
     private void JumpDownCheck()
     {
+        Debug.Log("Velocity X: " + rb.velocity.x);
+        Debug.Log("Velocity Y: " + rb.velocity.y);
         if (rb.velocity.y > 0f && playerStateController.GetCurrentState() != State.Down && !isGrounded)
         {
             playerStateController.ChangeState(State.Jump);
@@ -125,6 +123,22 @@ public class PlayerActionControler : MonoBehaviour
             CheckGround();
             yield return null;
         }
+
+        Debug.Log("Landed");
+    }
+
+    private void CheckGround()
+    {
+        // 射线向下检测
+        RaycastHit2D hit = Physics2D.Raycast(groundCheckPoint.position, Vector2.down, groundCheckDistance, groundLayer);
+
+
+        isGrounded = hit.collider != null;
+
+
+        // 可视化射线
+        Color color = isGrounded ? Color.green : Color.red;
+        Debug.DrawRay(groundCheckPoint.position, Vector2.down * groundCheckDistance, color);
     }
 
     #endregion
@@ -166,7 +180,6 @@ public class PlayerActionControler : MonoBehaviour
         // 计算速度差
         float speedDiff = targetSpeed - rb.velocity.x;
         // 如果速度差很小，直接设置速度,保持最高速度可达和保证静态不动
-        
 
 
         // 归一化当前速度
@@ -176,7 +189,8 @@ public class PlayerActionControler : MonoBehaviour
             rb.velocity = new Vector2(targetSpeed, rb.velocity.y);
             return;
         }
-        Debug.Log("normalizedSpeed: " + normalizedSpeed);
+
+        // Debug.Log("normalizedSpeed: " + normalizedSpeed);
         // 曲线倍率
         float accelMultiplier = accelCurve.Evaluate(normalizedSpeed);
 
@@ -198,6 +212,93 @@ public class PlayerActionControler : MonoBehaviour
         rb.velocity += new Vector2(movement, 0f);
     }
 
+    #region JumpLogic
+
+    [Header("Jump Base")] public float jumpForce = 14f; // 起跳初速度（决定“跳起来的爽感”）
+    public float maxJumpHoldTime = 0.2f; // 最长按住跳跃的时间（长按跳的高度上限）
+
+    [Header("Gravity")] public float gravityScale = 1f; // 基础重力
+    public float fallGravityMultiplier = 2.5f; // 下落重力（短按跳“啪”下来的关键）
+    public float jumpCutMultiplier = 0.5f; // 松开跳跃时，立刻削减上升速度
+
+    [Header("Apex")] public float apexGravityMultiplier = 0.5f; // 跳跃顶点时的“悬停感”
+    public float apexThreshold = 0.8f; // 速度接近 0 时，认为到顶点
+
+    private bool isJumping; // 是否处于跳跃流程中
+    private bool isHoldingJump; // 是否仍然按着跳跃键
+    private float jumpHoldTimer; // 已按住跳跃多久
+
+
+    private void Jump()
+    {
+        OnJumpStarted();
+    }
+
+    public void OnJumpStarted()
+    {
+        isGrounded = false;
+        // 起跳：一次性给向上的速度
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+
+        isJumping = true;
+        isHoldingJump = true;
+        jumpHoldTimer = 0f;
+    }
+
+    public void OnJumpCanceled()
+    {
+        isHoldingJump = false;
+
+        // 如果还在上升，立刻削减速度（短按跳的关键）
+        if (rb.velocity.y > 0)
+        {
+            rb.velocity = new Vector2(
+                rb.velocity.x,
+                rb.velocity.y * jumpCutMultiplier
+            );
+        }
+    }
+
+
+    private void ApplyJumpPhysics()
+    {
+        // ===== 1️⃣ 长按跳：持续上升（有限时间） =====
+        if (isJumping && isHoldingJump)
+        {
+            jumpHoldTimer += Time.fixedDeltaTime;
+
+            if (jumpHoldTimer < maxJumpHoldTime)
+            {
+                // 在可变跳跃窗口内，减少重力 → 跳得更高
+                rb.gravityScale = gravityScale;
+            }
+            else
+            {
+                isHoldingJump = false;
+            }
+        }
+
+        // ===== 2️⃣ 下落：重力加大（爽） =====
+        if (rb.velocity.y < 0)
+        {
+            rb.gravityScale = gravityScale * fallGravityMultiplier;
+        }
+
+        // ===== 3️⃣ 顶点悬停（速度接近 0） =====
+        else if (Mathf.Abs(rb.velocity.y) < apexThreshold)
+        {
+            rb.gravityScale = gravityScale * apexGravityMultiplier;
+        }
+
+        // ===== 4️⃣ 正常上升 =====
+        else
+        {
+            rb.gravityScale = gravityScale;
+        }
+    }
+
+    #endregion
+
 
     #region All Actions
 
@@ -205,13 +306,9 @@ public class PlayerActionControler : MonoBehaviour
     {
         float moveX = moveInputVector2.x * moveSpeed;
 
-        // float moveX = ApplyHorizontalMove(dashCurve, moveInputVector2.x);
-        // Debug.Log("MoveX: " + moveX);
 
-        // rb.velocity = new Vector2(moveX, rb.velocity.y);
-        
         ApplyHorizontalMove(dashCurve, moveInputVector2.x);
-        Debug.Log("Velocity X: " + rb.velocity.x);
+
         Player.instance.ChangeDir(moveX);
     }
 
@@ -219,12 +316,6 @@ public class PlayerActionControler : MonoBehaviour
     {
         // 将 isStunned 纳入判断，眩晕/击退期间禁止移动
         return !isDashing && !isAttacking && !isStunned;
-    }
-
-    private void Jump()
-    {
-        rb.velocity = new Vector2(rb.velocity.x, jumpSpeed);
-        isGrounded = false;
     }
 
 
