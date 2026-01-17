@@ -1,8 +1,5 @@
 using System;
 using System.Collections;
-using System.Net;
-using Unity.VisualScripting;
-using UnityEditor.Animations;
 using UnityEngine;
 
 public class PlayerStateController : MonoBehaviour
@@ -26,7 +23,7 @@ public class PlayerStateController : MonoBehaviour
     private PlayerController playerController;
 
     [Header("需要用到的Animator")] [SerializeField]
-    private AnimatorController[] _animators;
+    private RuntimeAnimatorController[] _animators;
 
     public Action EndAttack;
 

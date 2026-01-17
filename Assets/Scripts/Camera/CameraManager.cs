@@ -5,6 +5,15 @@ using Cinemachine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
+
+
+public enum PanDirection
+{
+    Up,
+    Down,
+    Left,
+    Right
+}
 public class CameraManager : MonoBehaviour
 {
     public static CameraManager instance;

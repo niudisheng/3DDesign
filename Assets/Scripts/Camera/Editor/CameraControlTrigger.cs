@@ -67,13 +67,7 @@ public class CustomInspectorObjects
     [HideInInspector] public float panTime = 0.35f;
 }
 
-public enum PanDirection
-{
-    Up,
-    Down,
-    Left,
-    Right
-}
+
 
 [CustomEditor(typeof(CameraControlTrigger))]
 public class CameraControlTriggerEditor : Editor
