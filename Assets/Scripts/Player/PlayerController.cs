@@ -58,7 +58,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Player.instance.haveSword)
         {
-            playerActionControler.AddInput(InputIntent.Attack);
+            playerActionControler.Attack();
         }
     }
 

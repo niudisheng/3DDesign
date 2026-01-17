@@ -29,6 +29,12 @@ public class PlayerActionControler : MonoBehaviour
 
     private bool isAttacking = false;
 
+    [Header("Jump Assist")]
+    [SerializeField] private float coyoteTime = 0.2f; // 土狼时间长度（秒）
+
+    private float coyoteTimeCounter;
+
+
     #endregion
 
     private void OnEnable()
@@ -48,6 +54,15 @@ public class PlayerActionControler : MonoBehaviour
             ApplyJumpPhysics();
             if (isGrounded)
             {
+                coyoteTimeCounter = coyoteTime;
+            }
+            else
+            {
+                coyoteTimeCounter -= Time.fixedDeltaTime;
+            }
+            if (coyoteTimeCounter > 0f)
+            {
+                
                 if (inputBuffer.TryConsume(InputIntent.Jump, 0.2f))
                 {
                     Jump();
@@ -103,29 +118,17 @@ public class PlayerActionControler : MonoBehaviour
         Debug.Log("Velocity X: " + rb.velocity.x);
         Debug.Log("Velocity Y: " + rb.velocity.y);
         CheckGround();
+
         if (rb.velocity.y > 0f && playerStateController.GetCurrentState() != State.Jump && !isGrounded)
         {
             playerStateController.ChangeState(State.Jump);
         }
 
-        if (rb.velocity.y < 0f && playerStateController.GetCurrentState() != State.Down && !isGrounded)
+        if (rb.velocity.y < 0f && playerStateController.GetCurrentState() != State.Down)
         {
             playerStateController.ChangeState(State.Down);
-            StartCoroutine(DownCoroutine());
+            
         }
-    }
-
-    private IEnumerator DownCoroutine()
-    {
-        // 等待落地
-        while (!isGrounded)
-        {
-            //下落时才进行地面检测
-
-            yield return null;
-        }
-
-        Debug.Log("Landed");
     }
 
     private void CheckGround()
@@ -370,7 +373,7 @@ public class PlayerActionControler : MonoBehaviour
     }
 
 
-    private void Attack()
+    public void Attack()
     {
         isAttacking = true;
         playerInteract.Attack(true);
