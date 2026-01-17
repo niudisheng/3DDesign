@@ -102,7 +102,8 @@ public class PlayerActionControler : MonoBehaviour
     {
         Debug.Log("Velocity X: " + rb.velocity.x);
         Debug.Log("Velocity Y: " + rb.velocity.y);
-        if (rb.velocity.y > 0f && playerStateController.GetCurrentState() != State.Down && !isGrounded)
+        CheckGround();
+        if (rb.velocity.y > 0f && playerStateController.GetCurrentState() != State.Jump && !isGrounded)
         {
             playerStateController.ChangeState(State.Jump);
         }
@@ -120,7 +121,7 @@ public class PlayerActionControler : MonoBehaviour
         while (!isGrounded)
         {
             //下落时才进行地面检测
-            CheckGround();
+
             yield return null;
         }
 
